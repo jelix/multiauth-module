@@ -1,0 +1,27 @@
+{
+    "name": "jelix/multiauth-module",
+    "type": "jelix-module",
+    "description": "module for Jelix, allowing to authenticate against multiple login/password providers.",
+    "keywords": ["ldap", "dao", "jelix"],
+    "homepage": "http://jelix.org",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Laurent Jouanneau",
+            "email": "laurent@jelix.org"
+        }
+    ],
+    "require": {
+    },
+    "minimum-stability": "stable",
+    "extra" : {
+        "jelix" : {
+            "modules": [
+                "multiauth"
+            ]
+        },
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}

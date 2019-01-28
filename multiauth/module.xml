@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="http://jelix.org/ns/module/1.0">
+    <info id="multiauth@modules.jelix.org" name="jauth" createdate="2019-01-25">
+        <version date="2019-01-25">0.1.0</version>
+        <label lang="en_US">plugin for jAuth supporting several authentication providers</label>
+        <description lang="en_US">It allows to check authentication against several
+           login/password providers : ldap, database etc.</description>
+        <license>MIT</license>
+        <copyright>2019 Laurent Jouanneau</copyright>
+        <creator name="Laurent Jouanneau" email="laurent@jelix.org" />
+        <homepageURL>http://jelix.org</homepageURL>
+    </info>
+    <dependencies>
+        <jelix minversion="1.6.21" maxversion="1.7.*"/>
+        <module name="jauth"/>
+        <!--<module name="jauthdb"/>
+        <module name="jcommunity"/>-->
+    </dependencies>
+    <autoload>
+        <namespacePathMap name="Jelix\MultiAuth" dir="lib" />
+    </autoload>
+</module>
