@@ -38,12 +38,12 @@ class dbdaoProvider extends \Jelix\MultiAuth\ProviderAbstract {
     }
 
     /**
-     * @param object $user   we don't use property of the accounts for now
+     * @param object $userAccount   we don't use property of the accounts for now
      * @param string $login
      * @param string $password
      * @return mixed
      */
-    public function verifyAuthentication($user, $login, $password){
+    public function verifyAuthentication($userAccount, $login, $password){
         if (trim($password) == '') {
             return self::VERIF_AUTH_BAD;
         }
@@ -61,7 +61,7 @@ class dbdaoProvider extends \Jelix\MultiAuth\ProviderAbstract {
         if ($result !== true) {
             // it is a new hash for the password, let's update it persistently
             $userRec->password = $result;
-            return self::VERIF_AUTH_OK_USER_TO_UPDATE;
+            $daouser->updatePassword($login, $result);
         }
 
         return self::VERIF_AUTH_OK;

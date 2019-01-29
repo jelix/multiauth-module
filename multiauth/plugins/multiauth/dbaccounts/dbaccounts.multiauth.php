@@ -51,11 +51,10 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
         if ($result === false) {
             return self::VERIF_AUTH_BAD;
         }
-
         if ($result !== true) {
             // it is a new hash for the password, let's update it persistently
             $user->password = $result;
-            return self::VERIF_AUTH_OK_USER_TO_UPDATE;
+            return self::VERIF_AUTH_OK_PASSWORD_UPDATED;
         }
         return self::VERIF_AUTH_OK;
     }

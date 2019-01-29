@@ -16,7 +16,8 @@ interface ProviderPluginInterface {
 
     const VERIF_AUTH_BAD = 0;
     const VERIF_AUTH_OK = 1;
-    const VERIF_AUTH_OK_USER_TO_UPDATE = 3;
+    const VERIF_AUTH_OK_PASSWORD_UPDATED = 3;
+    const VERIF_AUTH_OK_USER_TO_UPDATE = 5;
 
     /**
      * ProviderPluginInterface constructor.
