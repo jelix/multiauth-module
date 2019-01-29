@@ -6,7 +6,7 @@
  * @copyright  2019 Laurent Jouanneau*
  * @license   MIT
  */
-namespace Jelix\MultiAuth\Provider;
+namespace Jelix\MultiAuth;
 
 interface ProviderPluginInterface {
 

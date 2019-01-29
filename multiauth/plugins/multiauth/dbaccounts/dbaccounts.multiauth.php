@@ -16,7 +16,7 @@
  * @package    jelix
  * @subpackage multiauth_provider
  */
-class dbaccountsProvider extends \Jelix\MultiAuth\Provider\ProviderAbstract {
+class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
 
     protected $labelLocale = 'multiauth~multiauth.provider.dbaccounts.label';
 
@@ -57,7 +57,6 @@ class dbaccountsProvider extends \Jelix\MultiAuth\Provider\ProviderAbstract {
             $user->password = $result;
             return self::VERIF_AUTH_OK_USER_TO_UPDATE;
         }
-
         return self::VERIF_AUTH_OK;
     }
 }

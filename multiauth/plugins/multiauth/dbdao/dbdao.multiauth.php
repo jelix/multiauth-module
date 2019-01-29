@@ -16,7 +16,7 @@
  * @package    jelix
  * @subpackage multiauth_provider
  */
-class dbdaoProvider extends \Jelix\MultiAuth\Provider\ProviderAbstract {
+class dbdaoProvider extends \Jelix\MultiAuth\ProviderAbstract {
 
     protected $labelLocale = 'multiauth~multiauth.provider.dbdao.label';
 

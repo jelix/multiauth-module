@@ -7,20 +7,21 @@
  * @license   MIT
  */
 
-use \Jelix\MultiAuth\Provider\ProviderAbstract;
+use \Jelix\MultiAuth\ProviderAbstract;
 
 
 /**
  * authentication provider for the multiauth plugin
  *
- * it check authentication into an ldap
+ * it checks authentication into an ldap
  *
  * @package    jelix
  * @subpackage multiauth_provider
+ * @internal see https://tools.ietf.org/html/rfc4510
  */
-class ldap2Provider extends ProviderAbstract {
+class ldapProvider extends ProviderAbstract {
 
-    protected $labelLocale = 'multiauth~multiauth.provider.ldap2.label';
+    protected $labelLocale = 'multiauth~multiauth.provider.ldap.label';
 
     /**
      * default user attributes list
@@ -34,13 +35,12 @@ class ldap2Provider extends ProviderAbstract {
     public function __construct($params)
     {
         if (!extension_loaded('ldap')) {
-            throw new jException('ldapdao~errors.extension.unloaded');
+            throw new jException('multiauth~ldap.error.extension.unloaded');
         }
-
         parent::__construct($params);
 
         if (!isset($this->_params['ldapprofile']) || $this->_params['ldapprofile'] == '') {
-            throw new jException('ldapdao~errors.ldap.profile.missing');
+            throw new jException('multiauth~ldap.error.ldap.profile.missing');
         }
 
         $profile = jProfiles::get('ldap', $this->_params['ldapprofile']);
@@ -55,6 +55,7 @@ class ldap2Provider extends ProviderAbstract {
             'protocolVersion'   =>  3,
             'searchUserBaseDN' => '',
             'searchGroupFilter' => '',
+            'searchGroupKeepUserInDefaultGroups' => true,
             'searchGroupProperty' => '',
             'searchGroupBaseDN' => ''
         );
@@ -67,7 +68,7 @@ class ldap2Provider extends ProviderAbstract {
         }
 
         if ($this->_params['searchUserBaseDN'] == '') {
-            throw new jException('ldapdao~errors.search.base.missing');
+            throw new jException('multiauth~ldap.error.search.base.missing');
         }
 
         if (!isset($this->_params['searchAttributes']) || $this->_params['searchAttributes'] == '') {
@@ -87,14 +88,14 @@ class ldap2Provider extends ProviderAbstract {
         }
 
         if (!isset($this->_params['searchUserFilter']) || $this->_params['searchUserFilter'] == '') {
-            throw new jException('ldapdao~errors.searchUserFilter.missing');
+            throw new jException('multiauth~ldap.error.searchUserFilter.missing');
         }
         if (!is_array($this->_params['searchUserFilter'])) {
             $this->_params['searchUserFilter'] = array($this->_params['searchUserFilter']);
         }
 
         if (!isset($this->_params['bindUserDN']) || $this->_params['bindUserDN'] == '') {
-            throw new jException('ldapdao~errors.bindUserDN.missing');
+            throw new jException('multiauth~ldap.error.bindUserDN.missing');
         }
         if (!is_array($this->_params['bindUserDN'])) {
             $this->_params['bindUserDN'] = array($this->_params['bindUserDN']);
@@ -107,11 +108,18 @@ class ldap2Provider extends ProviderAbstract {
 
     public function changePassword($login, $newpassword)
     {
-        throw new jException('ldapdao~errors.unsupported.password.change');
+        throw new jException('multiauth~ldap.error.unsupported.password.change');
     }
 
     public function verifyAuthentication($user, $login, $password)
     {
+        if (trim($password) == '' || trim($login) == '') {
+            // we don't want Unauthenticated Authentication
+            // and Anonymous Authentication
+            // https://tools.ietf.org/html/rfc4513#section-5.1
+            return self::VERIF_AUTH_BAD;
+        }
+
         $connectAdmin = $this->_bindLdapAdminUser();
         if (!$connectAdmin) {
             return self::VERIF_AUTH_BAD;
@@ -120,13 +128,13 @@ class ldap2Provider extends ProviderAbstract {
         // see if the user exists into the ldap directory
         $userLdapAttributes = $this->searchLdapUserAttributes($connectAdmin, $login, $user);
         if ($userLdapAttributes === false) {
-            jLog::log('ldapdao: user '.$login.' not found into the ldap', 'auth');
+            jLog::log('multiauth ldap: user '.$login.' not found into the ldap', 'auth');
             return self::VERIF_AUTH_BAD;
         }
 
         $connect = $this->_getLinkId();
         if (!$connect) {
-            jLog::log('ldapdao: impossible to connect to ldap', 'auth');
+            jLog::log('multiauth ldap: impossible to connect to ldap', 'auth');
             return self::VERIF_AUTH_BAD;
         }
         // authenticate user. let's try with all configured DN
@@ -134,9 +142,9 @@ class ldap2Provider extends ProviderAbstract {
         ldap_close($connect);
 
         if ($userDn === false) {
-            jLog::log('ldapdao: cannot authenticate to ldap with given bindUserDN for the login ' . $login. '. Wrong DN or password', 'auth');
+            jLog::log('multiauth ldap: cannot authenticate to ldap with given bindUserDN for the login ' . $login. '. Wrong DN or password', 'auth');
             foreach ($this->bindUserDnTries as $dn) {
-                jLog::log('ldapdao:  tried to connect with bindUserDN=' . $dn, 'auth');
+                jLog::log('multiauth ldap:  tried to connect with bindUserDN=' . $dn, 'auth');
             }
             return self::VERIF_AUTH_BAD;
         }
@@ -154,6 +162,18 @@ class ldap2Provider extends ProviderAbstract {
 
     protected function synchronizeAclGroups($login, $userGroups)
     {
+        if ($this->_params['searchGroupKeepUserInDefaultGroups']) {
+            // Add default groups
+            $gplist = jDao::get('jacl2db~jacl2group', 'jacl2_profile')
+                ->getDefaultGroups();
+            foreach ($gplist as $group) {
+                $idx = array_search($group->name, $userGroups);
+                if ($idx === false) {
+                    $userGroups[] = $group->name;
+                }
+            }
+        }
+
         // we know the user group: we should be sure it is the same in jAcl2
         $gplist = jDao::get('jacl2db~jacl2groupsofuser', 'jacl2_profile')
             ->getGroupsUser($login);
@@ -239,6 +259,7 @@ class ldap2Provider extends ProviderAbstract {
             if ($bind) {
                 break;
             } else {
+                jLog::log('multiauth ldap: error when trying to connect with '.$realDn.': '.ldap_errno($connect).':'.ldap_error($connect), 'auth');
                 $this->bindUserDnTries[] = $realDn;
             }
         }
@@ -292,6 +313,14 @@ class ldap2Provider extends ProviderAbstract {
             return '%%'.$val.'%%';
         }, $searchStr);
         $values = array_values($userLdapAttributes);
+        // escape parenthesis
+        $values = array_map(function ($val) {
+            return str_replace(
+                array('(', ')'),
+                array('\\(', '\\)'),
+                $val
+            );
+        }, $values);
         $values[] = $userDn;
         $values[] = $login;
         $values[] = $login;
@@ -346,7 +375,7 @@ class ldap2Provider extends ProviderAbstract {
     {
         $connect = $this->_getLinkId();
         if (!$connect) {
-            jLog::log('ldapdao: impossible to connect to ldap', 'auth');
+            jLog::log('multiauth ldap: impossible to connect to ldap', 'auth');
             return false;
         }
 
@@ -357,9 +386,9 @@ class ldap2Provider extends ProviderAbstract {
         }
         if (!$bind) {
             if ($this->_params['adminUserDn'] == '') {
-                jLog::log('ldapdao: impossible to authenticate to ldap as anonymous admin user', 'auth');
+                jLog::log('multiauth ldap: impossible to authenticate to ldap as anonymous admin user', 'auth');
             } else {
-                jLog::log('ldapdao: impossible to authenticate to ldap with admin user '.$this->_params['adminUserDn'], 'auth');
+                jLog::log('multiauth ldap: impossible to authenticate to ldap with admin user '.$this->_params['adminUserDn'], 'auth');
             }
             ldap_close($connect);
             return false;

@@ -7,7 +7,7 @@
  * @license   MIT
  */
 
-use \Jelix\MultiAuth\Provider\ProviderPluginInterface;
+use \Jelix\MultiAuth\ProviderPluginInterface;
 
 /**
  * authentication driver allowing to authenticate against multiple authentication
@@ -30,10 +30,13 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
 
     function __construct($params) {
         parent::__construct($params);
-        if(!isset($this->_params['profile'])) {
+        if (!isset($this->_params['profile'])) {
             $this->_params['profile'] = '';
         }
-        if (!isset($this->_params['provider'])) {
+        if (!isset($this->_params['dao'])) {
+            throw new Exception("Dao selector is missing into the multiauth configuration");
+        }
+        if (!isset($this->_params['providers'])) {
             /** @var ProviderPluginInterface $plugin */
             $plugin = jApp::loadPlugin('dbaccounts', 'multiauth', '.multiauth.php', 'dbaccountsProvider', array());
             if (is_null($plugin)) {
@@ -45,12 +48,22 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
         else {
             $config = jAuth::loadConfig();
             foreach($this->_params['providers'] as $providerInfo) {
-                $providerConfig = array();
+                $providerConfig = array(
+                    'password_hash_method' => $this->passwordHashMethod,
+                    'password_hash_options' => $this->passwordHashOptions
+                );
+                if (isset($this->_params['password_crypt_function'])) {
+                    $providerConfig['password_crypt_function'] = $this->_params['password_crypt_function'];
+                }
                 if (strpos($providerInfo, ':') !== false) {
-                    list($provider, $providerSection) = explode(';', $providerInfo);
+                    list($provider, $providerSection) = explode(':', $providerInfo);
                     if (isset($config[$providerSection]) && is_array($config[$providerSection])) {
-                        $providerConfig = $config[$providerSection];
+                        $providerConfig = array_merge($providerConfig, $config[$providerSection]);
                     }
+                }
+                else {
+                    $provider = $providerInfo;
+
                 }
                 /** @var ProviderPluginInterface $plugin */
                 $plugin = jApp::loadPlugin($provider, 'multiauth', '.multiauth.php',
@@ -173,13 +186,11 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
                 // password
                 continue;
             }
-
             $result = $provider->verifyAuthentication($user, $login, $password);
 
             if ($result & ProviderPluginInterface::VERIF_AUTH_OK ||
                 $result & ProviderPluginInterface::VERIF_AUTH_OK_USER_TO_UPDATE
             ) {
-
                 if (!$useAccountTableForPassword) {
                     $pass = '!!multiauth:'.$provider->getRegisterKey().'!!';
                     if ($user->password != $pass) {
@@ -201,6 +212,9 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
                         // is using the same table of multiauth, else anybody unregistered
                         // can login with any password, and then become a registered user
                         jAuth::saveNewUser($user);
+                    }
+                    else {
+                        return false;
                     }
                 }
                 else if ($result & ProviderPluginInterface::VERIF_AUTH_OK_USER_TO_UPDATE) {

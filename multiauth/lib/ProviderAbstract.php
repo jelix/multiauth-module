@@ -6,9 +6,9 @@
  * @copyright  2019 Laurent Jouanneau
  * @license   MIT
  */
-namespace Jelix\MultiAuth\Provider;
+namespace Jelix\MultiAuth;
 
-abstract class ProviderAbstract implements \Jelix\MultiAuth\Provider\ProviderPluginInterface {
+abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterface {
 
     protected $labelLocale = '';
 
