@@ -26,6 +26,11 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
      */
     protected $providers = array();
 
+    /**
+     * @var ProviderPluginInterface
+     */
+    protected $dbAccountProvider = null;
+
     protected $automaticAccountCreation = false;
 
     function __construct($params) {
@@ -44,6 +49,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
             }
             $plugin->setRegisterKey('dbaccounts');
             $this->providers['dbaccounts'] = $plugin;
+            $this->dbAccountProvider = $plugin;
         }
         else {
             $config = jAuth::loadConfig();
@@ -63,8 +69,8 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
                 }
                 else {
                     $provider = $providerInfo;
-
                 }
+
                 /** @var ProviderPluginInterface $plugin */
                 $plugin = jApp::loadPlugin($provider, 'multiauth', '.multiauth.php',
                     $provider.'Provider', $providerConfig);
@@ -73,6 +79,12 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
                 }
                 $plugin->setRegisterKey($providerInfo);
                 $this->providers[$providerInfo] = $plugin;
+                if ($plugin->getFeature() & ProviderPluginInterface::FEATURE_USE_MULTIAUTH_TABLE) {
+                    if ($this->dbAccountProvider) {
+                        throw new Exception("Multiauth plugin does not accept multiple providers based on the account table");
+                    }
+                    $this->dbAccountProvider = $plugin;
+                }
             }
         }
 
@@ -81,13 +93,13 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
         }
     }
 
-    public function saveNewUser($user){
+    public function saveNewUser($user) {
         $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
         $dao->insert($user);
         return true;
     }
 
-    public function removeUser($login){
+    public function removeUser($login) {
         $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
         $dao->deleteByLogin($login);
         return true;
@@ -150,16 +162,27 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
     public function changePassword($login, $newpassword) {
         $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
         $user = $dao->getByLogin($login);
+
         if (preg_match("/^!!multiauth:(.+)!!$/", $user->password, $m)) {
             if (isset($this->providers[$m[1]])) {
-                $p = $this->providers[$m[1]];
-                if ($p->getFeature() & ProviderPluginInterface::FEATURE_CHANGE_PASSWORD) {
-                    return $p->changePassword($login, $newpassword);
-                }
+                $provider = $this->providers[$m[1]];
             }
-            return false;
+            else {
+                $provider = null;
+            }
         }
-        return $dao->updatePassword($login, $this->cryptPassword($newpassword));
+        else {
+            $provider = $this->dbAccountProvider;
+        }
+        if ($provider && $provider->getFeature() & ProviderPluginInterface::FEATURE_CHANGE_PASSWORD) {
+            $oldPass = $user->password;
+            $ok = $provider->changePassword($user, $login, $newpassword);
+            if ($ok && $oldPass != $user->password) {
+                $dao->updatePassword($login, $user->password);
+            }
+            return $ok;
+        }
+        return false;
     }
 
     public function verifyPassword($login, $password) {
@@ -251,5 +274,33 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
      */
     public function getProviders() {
         return $this->providers;
+    }
+
+    /**
+     * @param $login
+     * @return  ProviderPluginInterface
+     */
+    public function getProviderForLogin($login, $password='') {
+        if ($password == '') {
+            $user = $this->getUser($login);
+            $password = $user->password;
+        }
+
+        if (preg_match("/^!!multiauth:(.*)!!$/", $password, $m)) {
+            if (isset($this->providers[$m[1]])) {
+                return $this->providers[$m[1]];
+            }
+            return null;
+        }
+        else {
+            return $this->dbAccountProvider;
+        }
+    }
+
+    /**
+     * @return ProviderPluginInterface|null
+     */
+    public function getDbAccountProvider() {
+        return $this->dbAccountProvider;
     }
 }

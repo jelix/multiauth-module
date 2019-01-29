@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<events xmlns="http://jelix.org/ns/events/1.0">
+    <listener name="multiauth">
+        <event name="jauthdbAdminGetViewInfo" />
+        <event name="jauthdbAdminPrepareCreate" />
+        <event name="jauthdbAdminEditCreate" />
+        <event name="jauthdbAdminBeforeCheckCreateForm" />
+        <event name="jauthdbAdminCheckCreateForm" />
+        <event name="jauthdbAdminPrepareUpdate" />
+        <event name="jauthdbAdminEditUpdate" />
+        <event name="jauthdbAdminCheckUpdateForm" />
+
+        <event name="jcommunity_init_edit_form_account" />
+        <event name="jcommunity_prepare_edit_account" />
+        <event name="jcommunity_edit_account" />
+        <event name="jcommunity_check_before_save_account" />
+        <event name="jcommunity_save_account" />
+    </listener>
+</events>

@@ -20,6 +20,9 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
 
     protected $labelLocale = 'multiauth~multiauth.provider.dbaccounts.label';
 
+    /**
+     * @inheritdoc
+     */
     function __construct($params) {
 
         parent::__construct($params);
@@ -28,20 +31,25 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getFeature() {
-        return self::FEATURE_SUPPORT_PASSWORD |
+        return self::FEATURE_CHANGE_PASSWORD | self::FEATURE_SUPPORT_PASSWORD |
             self::FEATURE_USE_MULTIAUTH_TABLE;
     }
 
     /**
-     * @param string $login
-     * @param string $newpassword
-     * @throws jException
+     * @inheritdoc
      */
-    public function changePassword($login, $newpassword){
-        throw new jException('dbmultiauthProvider does not support password change directly');
+    public function changePassword($userAccount, $login, $newpassword){
+        $userAccount->password = $this->cryptPassword($newpassword);
+        return true;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function verifyAuthentication($user, $login, $password){
         if (trim($password) == '') {
             return self::VERIF_AUTH_BAD;
@@ -57,5 +65,14 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
             return self::VERIF_AUTH_OK_PASSWORD_UPDATED;
         }
         return self::VERIF_AUTH_OK;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function userExists($login) {
+        // FIXME we should have dao selector so we could check if the user exists
+        // FIXME for the moment, this method is not used so we don't care
+        return false;
     }
 }

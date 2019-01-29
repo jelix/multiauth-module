@@ -32,6 +32,9 @@ class ldapProvider extends ProviderAbstract {
         "name"=>"firstname"
     );
 
+    /**
+     * @inheritdoc
+     */
     public function __construct($params)
     {
         if (!extension_loaded('ldap')) {
@@ -102,15 +105,24 @@ class ldapProvider extends ProviderAbstract {
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getFeature() {
         return self::FEATURE_SUPPORT_PASSWORD;
     }
 
-    public function changePassword($login, $newpassword)
+    /**
+     * @inheritdoc
+     */
+    public function changePassword($userAccount, $login, $newpassword)
     {
         throw new jException('multiauth~ldap.error.unsupported.password.change');
     }
 
+    /**
+     * @inheritdoc
+     */
     public function verifyAuthentication($user, $login, $password)
     {
         if (trim($password) == '' || trim($login) == '') {
@@ -395,4 +407,34 @@ class ldapProvider extends ProviderAbstract {
         }
         return $connect;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function userExists($login) {
+        $connectAdmin = $this->_bindLdapAdminUser();
+        if (!$connectAdmin) {
+            return false;
+        }
+
+        // see if the user exists into the ldap directory
+        foreach ($this->_params['searchUserFilter'] as $searchUserFilter) {
+            $filter = str_replace(
+                array('%%LOGIN%%', '%%USERNAME%%'), // USERNAME deprecated
+                $login,
+                $searchUserFilter
+            );
+            $search = ldap_search(
+                $connectAdmin,
+                $this->_params['searchUserBaseDN'],
+                $filter,
+                array('dn')
+            );
+            if ($search && ($entry = ldap_first_entry($connectAdmin, $search))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

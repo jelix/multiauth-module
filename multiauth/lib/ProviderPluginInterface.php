@@ -10,8 +10,14 @@ namespace Jelix\MultiAuth;
 
 interface ProviderPluginInterface {
 
+    /** password of a user can be changed */
     const FEATURE_CHANGE_PASSWORD = 1;
+    /** the provider support login/password */
     const FEATURE_SUPPORT_PASSWORD = 2;
+    /**
+     * the provider is using the password field in the account table of multiauth
+     * to store the hashed password.
+     */
     const FEATURE_USE_MULTIAUTH_TABLE = 4;
 
     const VERIF_AUTH_BAD = 0;
@@ -51,17 +57,24 @@ interface ProviderPluginInterface {
     public function getFeature();
 
     /**
-     * @param $login
-     * @param $newpassword
+     * @param object $userAccount
+     * @param string $login
+     * @param string $newpassword
      * @return mixed
      */
-    public function changePassword($login, $newpassword);
+    public function changePassword($userAccount, $login, $newpassword);
 
     /**
-     * @param object $user
+     * @param object $userAccount
      * @param string $login
      * @param string $password
      * @return int one of VERIF_AUTH_* const
      */
-    public function verifyAuthentication($user, $login, $password);
+    public function verifyAuthentication($userAccount, $login, $password);
+
+    /**
+     * @param string $login
+     * @return boolean true if a user with this login exists
+     */
+    public function userExists($login);
 }
