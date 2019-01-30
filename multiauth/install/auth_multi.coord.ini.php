@@ -81,23 +81,15 @@ password_hash_options =
 
 [multiauth]
 
-compatiblewithdb = on
-
 ; name of the dao to get user data
 dao = "jauthdb~jelixuser"
 
 ; profile to use for jDb 
 profile = "jauth"
 
+; list of authentication providers
 providers[]=ldap:multiauth_ldap
 providers[]=dbaccounts
-
-; ldap needs clear password to connect, this is useless for our plugin
-; except for the admin user.
-; even if password_hash_method is activated, we set it to allow
-; password storage migration
-; @deprecated
-password_crypt_function = sha1
 
 ; name of the form for the jauthdb_admin module
 form = "jauthdb_admin~jelixuser"
@@ -109,6 +101,15 @@ uploadsDirectory= ""
 
 ; when a user login successfully, an account will be created automatically
 automaticAccountCreation = on
+
+
+; required. Internal use for jAuth. Don't touch it.
+compatiblewithdb = on
+
+; you should set it to allow password storage migration, if you have an old
+; users table.
+; @deprecated
+password_crypt_function = sha1
 
 ;------- parameters for the multiauth ldap plugin
 
