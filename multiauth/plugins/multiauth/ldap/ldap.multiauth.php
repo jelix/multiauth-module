@@ -115,7 +115,7 @@ class ldapProvider extends ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function changePassword($userAccount, $login, $newpassword)
+    public function changePassword($login, $newpassword)
     {
         throw new jException('multiauth~ldap.error.unsupported.password.change');
     }

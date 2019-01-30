@@ -17,10 +17,15 @@ abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterf
     protected $passwordHashMethod;
     protected $passwordHashOptions;
 
+    protected $accountsDao;
+    protected $accountsDaoProfile;
+
     function __construct($params) {
         $this->_params = $params;
         $this->passwordHashOptions = $params['password_hash_options'];
         $this->passwordHashMethod = $params['password_hash_method'];
+        $this->accountsDao = $params['accountsDao'];
+        $this->accountsDaoProfile = $params['accountsDaoProfile'];
         if (isset($params['label'])) {
             $this->label = $params['label'];
         }

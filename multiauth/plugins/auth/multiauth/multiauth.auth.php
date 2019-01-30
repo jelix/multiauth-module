@@ -56,7 +56,9 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
             foreach($this->_params['providers'] as $providerInfo) {
                 $providerConfig = array(
                     'password_hash_method' => $this->passwordHashMethod,
-                    'password_hash_options' => $this->passwordHashOptions
+                    'password_hash_options' => $this->passwordHashOptions,
+                    'accountsDao' => $this->_params['dao'],
+                    'accountsDaoProfile'=> $this->_params['profile'],
                 );
                 if (isset($this->_params['password_crypt_function'])) {
                     $providerConfig['password_crypt_function'] = $this->_params['password_crypt_function'];
@@ -175,12 +177,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
             $provider = $this->dbAccountProvider;
         }
         if ($provider && $provider->getFeature() & ProviderPluginInterface::FEATURE_CHANGE_PASSWORD) {
-            $oldPass = $user->password;
-            $ok = $provider->changePassword($user, $login, $newpassword);
-            if ($ok && $oldPass != $user->password) {
-                $dao->updatePassword($login, $user->password);
-            }
-            return $ok;
+            return $provider->changePassword($login, $newpassword);
         }
         return false;
     }
@@ -222,14 +219,15 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
             $result = $provider->verifyAuthentication($user, $login, $password);
 
             if ($result & ProviderPluginInterface::VERIF_AUTH_OK ||
-                $result & ProviderPluginInterface::VERIF_AUTH_OK_USER_TO_UPDATE ||
-                $result & ProviderPluginInterface::VERIF_AUTH_OK_PASSWORD_UPDATED
+                $result & ProviderPluginInterface::VERIF_AUTH_OK_USER_TO_UPDATE
             ) {
                 if (!$useAccountTableForPassword) {
                     $pass = '!!multiauth:'.$provider->getRegisterKey().'!!';
                     if ($user->password != $pass) {
                         $user->password = $pass;
-                        $result |= ProviderPluginInterface::VERIF_AUTH_OK_PASSWORD_UPDATED;
+                        if (!$createdUser) {
+                            $dao->updatePassword($login, $user->password);
+                        }
                     }
                 }
 
@@ -252,11 +250,6 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
                     }
                 }
                 else {
-                    if ($result & ProviderPluginInterface::VERIF_AUTH_OK_PASSWORD_UPDATED &&
-                        $useAccountTableForPassword) {
-                        $dao->updatePassword($login, $user->password);
-                    }
-
                     if ($result & ProviderPluginInterface::VERIF_AUTH_OK_USER_TO_UPDATE) {
                         jAuth::updateUser($user);
                     }

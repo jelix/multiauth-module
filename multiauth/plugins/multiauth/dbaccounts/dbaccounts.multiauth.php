@@ -42,9 +42,9 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function changePassword($userAccount, $login, $newpassword){
-        $userAccount->password = $this->cryptPassword($newpassword);
-        return true;
+    public function changePassword($login, $newpassword){
+        $dao = jDao::get($this->accountsDao, $this->accountsDaoProfile);
+        return $dao->updatePassword($login, $this->cryptPassword($newpassword));
     }
 
     /**
@@ -62,7 +62,8 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
         if ($result !== true) {
             // it is a new hash for the password, let's update it persistently
             $user->password = $result;
-            return self::VERIF_AUTH_OK_PASSWORD_UPDATED;
+            $dao = jDao::get($this->accountsDao, $this->accountsDaoProfile);
+            $dao->updatePassword($login, $user->password);
         }
         return self::VERIF_AUTH_OK;
     }
@@ -71,8 +72,7 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
      * @inheritdoc
      */
     public function userExists($login) {
-        // FIXME we should have dao selector so we could check if the user exists
-        // FIXME for the moment, this method is not used so we don't care
-        return false;
+        $dao = jDao::get($this->accountsDao, $this->accountsDaoProfile);
+        return !!$dao->getByLogin($login);
     }
 }

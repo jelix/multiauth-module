@@ -22,8 +22,7 @@ interface ProviderPluginInterface {
 
     const VERIF_AUTH_BAD = 0;
     const VERIF_AUTH_OK = 1;
-    const VERIF_AUTH_OK_PASSWORD_UPDATED = 3;
-    const VERIF_AUTH_OK_USER_TO_UPDATE = 5;
+    const VERIF_AUTH_OK_USER_TO_UPDATE = 3;
 
     /**
      * ProviderPluginInterface constructor.
@@ -57,12 +56,11 @@ interface ProviderPluginInterface {
     public function getFeature();
 
     /**
-     * @param object $userAccount
      * @param string $login
      * @param string $newpassword
-     * @return mixed
+     * @return boolean
      */
-    public function changePassword($userAccount, $login, $newpassword);
+    public function changePassword($login, $newpassword);
 
     /**
      * @param object $userAccount

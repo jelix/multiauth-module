@@ -41,7 +41,7 @@ class dbdaoProvider extends \Jelix\MultiAuth\ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function changePassword($userAccount, $login, $newpassword){
+    public function changePassword($login, $newpassword){
         $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
         return $dao->updatePassword($login, $this->cryptPassword($newpassword));
     }
