@@ -195,17 +195,25 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
             }
         }
 
-        if (!$createdUser && preg_match("/^!!multiauth:(.*)!!$/", $user->password, $m) &&
-            isset($this->providers[$m[1]])
-        ) {
-            // if we know the provider, just check password with this provider
-            $providers = array($m[1] => $this->providers[$m[1]]);
-        }
-        else {
-            $providers = & $this->providers;
+        $providers = & $this->providers;
+
+        if (!$createdUser) {
+            // we're trying to get the right provider for the authentication,
+            // with the content of the password field
+
+            if ( preg_match("/^!!multiauth:(.*)!!$/", $user->password, $m)) {
+                // ok we have an external provider
+                if (isset($this->providers[$m[1]])) {
+                    $providers = array($m[1] => $this->providers[$m[1]]);
+                }
+            }
+            else if ($this->dbAccountProvider) {
+                // this is an internal provider, a db account provider
+                $providers = array($this->dbAccountProvider->getRegisterKey() => $this->dbAccountProvider);
+            }
         }
 
-        foreach($providers as $pName => $provider) {
+        foreach($providers as $pKey => $provider) {
             $useAccountTableForPassword = (($provider->getFeature() & ProviderPluginInterface::FEATURE_USE_MULTIAUTH_TABLE)
                 || get_class($provider) == 'dbaccountsProvider');
 
@@ -295,5 +303,19 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2 {
      */
     public function getDbAccountProvider() {
         return $this->dbAccountProvider;
+    }
+
+    public function updateProviderInAccount($login, $providerKey) {
+        if (!isset($this->providers[$providerKey])) {
+            throw new Exception('bad provider '.$providerKey);
+        }
+        $feat = $this->providers[$providerKey]->getFeature();
+        if ($feat & ProviderPluginInterface::FEATURE_USE_MULTIAUTH_TABLE) {
+            throw new Exception('Cannot set provider '.$providerKey);
+        }
+
+        $password = '!!multiauth:'.$providerKey.'!!';
+        $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
+        $dao->updatePassword($login, $password);
     }
 }

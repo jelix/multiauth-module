@@ -8,6 +8,7 @@
         <event name="jauthdbAdminCheckCreateForm" />
         <event name="jauthdbAdminPrepareUpdate" />
         <event name="jauthdbAdminEditUpdate" />
+        <event name="jauthdbAdminBeforeCheckUpdateForm" />
         <event name="jauthdbAdminCheckUpdateForm" />
 
         <event name="jcommunity_init_edit_form_account" />

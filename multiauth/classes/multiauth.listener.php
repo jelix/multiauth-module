@@ -142,25 +142,79 @@ class multiauthListener extends jEventListener{
      * @param jEvent $event
      */
     function onjauthdbAdminPrepareUpdate ($event) {
-        // seulement si (himself = false et droit de modifier user)
-
-        // modifie le formulaire pour ajouter choix du provider
-        // créer un <choice> : item = nom du provider, champs: password/password confirm
-        // si le provider autorise à changer le mot de passe sauf si provider
-        // actuellement selectionné.
-        // desactiver champs mot de passe existant
+        if (!$event->himself && jAcl2::check("auth.users.create")) {
+            $this->prepareUserForm($event->form, false);
+        }
     }
 
     /**
      * @param jEvent $event
      */
     function onjauthdbAdminEditUpdate ($event) {
+        if (!$event->himself && jAcl2::check("auth.users.create")) {
+            $this->prepareUserForm($event->form, false);
+        }
+    }
+
+
+    /**
+     * @param jEvent $event
+     */
+    function onjauthdbAdminBeforeCheckUpdateForm ($event) {
+        if (!$event->himself && jAcl2::check("auth.users.create")) {
+            $this->prepareUserForm($event->form, false);
+        }
     }
 
     /**
      * @param jEvent $event
      */
     function onjauthdbAdminCheckUpdateForm ($event) {
+        if (!$event->himself && jAcl2::check("auth.users.create")) {
+            /** @var multiauthAuthDriver $authDriver */
+            $authDriver = jAuth::getDriver();
+            /** @var jFormsBase $form */
+            $form = $event->form;
+            $form->getControl('password')->deactivate(false);
+
+            $currentProvider = $authDriver->getProviderForLogin($form->getData('login'));
+
+            $providerKey = $form->getData('auth_provider');
+
+            if ($providerKey == $currentProvider->getRegisterKey()) {
+                // the provider did not changed
+                $event->add(array('check'=>true));
+                return;
+            }
+
+            $provider = $authDriver->getProviders()[$providerKey];
+
+            if (!$provider->userExists($form->getData('login'))) {
+                $event->add(array('check'=>false));
+                $form->setErrorOn('auth_provider', jLocale::get('multiauth~multiauth.choice.provider.inexistant.user'));
+                return;
+            }
+
+            if ($provider->getFeature() & \Jelix\MultiAuth\ProviderPluginInterface::FEATURE_CHANGE_PASSWORD)
+            {
+                $id = str_replace(':', '_', $providerKey);
+                $newPassword = $form->getData('password_'.$id);
+                if ($newPassword !== null && trim($newPassword) !== '') {
+                    $form->setData('password', $newPassword);
+                    $provider->changePassword($form->getData('login'), $newPassword);
+                }
+                else {
+                    $form->setErrorOn('password_'.$id, jLocale::get('multiauth~multiauth.message.bad.password'));
+                    $event->add(array('check'=>false));
+                    return;
+                }
+            }
+            else {
+                $form->setData('password', '!!multiauth:'.$providerKey.'!!');
+                $authDriver->updateProviderInAccount($form->getData('login'), $providerKey);
+            }
+        }
+        $event->add(array('check'=>true));
     }
 
 
