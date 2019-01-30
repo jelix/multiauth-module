@@ -216,38 +216,4 @@ class multiauthListener extends jEventListener{
         }
         $event->add(array('check'=>true));
     }
-
-
-
-
-    /**
-     * @param jEvent $event
-     */
-    function onjcommunity_init_edit_form_account ($event) {
-    }
-
-    /**
-     * @param jEvent $event
-     */
-    function onjcommunity_prepare_edit_account ($event) {
-    }
-
-    /**
-     * @param jEvent $event
-     */
-    function onjcommunity_edit_account ($event) {
-    }
-
-    /**
-     * @param jEvent $event
-     */
-    function onjcommunity_check_before_save_account ($event) {
-    }
-
-    /**
-     * @param jEvent $event
-     */
-    function onjcommunity_save_account ($event) {
-    }
-
 }
