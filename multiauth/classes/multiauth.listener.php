@@ -7,12 +7,14 @@
  * @license   MIT
  */
 
-class multiauthListener extends jEventListener{
+class multiauthListener extends jEventListener
+{
 
     /**
      * @param jEvent $event
      */
-    function onjauthdbAdminGetViewInfo ($event) {
+    public function onjauthdbAdminGetViewInfo($event)
+    {
         if (jAcl2::check("auth.users.create")) {
             $login = $event->form->getData('login');
             $password = $event->form->getData('password');
@@ -30,7 +32,8 @@ class multiauthListener extends jEventListener{
     /**
      * @param jFormsBase $form
      */
-    protected function prepareUserForm($form, $createForm = false) {
+    protected function prepareUserForm($form, $createForm = false)
+    {
         /** @var multiauthAuthDriver $authDriver */
         $authDriver = jAuth::getDriver();
         if (!$createForm) {
@@ -38,8 +41,7 @@ class multiauthListener extends jEventListener{
             $password = $form->getData('password');
             /** @var \Jelix\MultiAuth\ProviderPluginInterface $provider */
             $userProvider = $authDriver->getProviderForLogin($login, $password);
-        }
-        else {
+        } else {
             $userProvider = $authDriver->getDbAccountProvider();
         }
 
@@ -47,12 +49,13 @@ class multiauthListener extends jEventListener{
         $choice->label = jLocale::get('multiauth~multiauth.choice.provider.label');
 
         $providers = $authDriver->getProviders();
-        foreach($providers as $pName => $provider) {
+        foreach ($providers as $pName => $provider) {
             $choice->createItem($pName, $provider->getLabel());
             if ($provider->getFeature() & \Jelix\MultiAuth\ProviderPluginInterface::FEATURE_CHANGE_PASSWORD
                 &&
                 ($createForm || (
-                    $userProvider && $provider->getRegisterKey() != $userProvider->getRegisterKey()))
+                    $userProvider && $provider->getRegisterKey() != $userProvider->getRegisterKey()
+                ))
             ) {
                 $id = str_replace(':', '_', $pName);
                 $ctrl= new jFormsControlSecret('password_'.$id);
@@ -80,28 +83,32 @@ class multiauthListener extends jEventListener{
     /**
      * @param jEvent $event
      */
-    function onjauthdbAdminPrepareCreate ($event) {
+    public function onjauthdbAdminPrepareCreate($event)
+    {
         $this->prepareUserForm($event->form, true);
     }
 
     /**
      * @param jEvent $event
      */
-    function onjauthdbAdminEditCreate ($event) {
+    public function onjauthdbAdminEditCreate($event)
+    {
         $this->prepareUserForm($event->form, true);
     }
 
     /**
      * @param jEvent $event
      */
-    function onjauthdbAdminBeforeCheckCreateForm ($event) {
+    public function onjauthdbAdminBeforeCheckCreateForm($event)
+    {
         $this->prepareUserForm($event->form, true);
     }
 
     /**
      * @param jEvent $event
      */
-    function onjauthdbAdminCheckCreateForm ($event) {
+    public function onjauthdbAdminCheckCreateForm($event)
+    {
         /** @var multiauthAuthDriver $authDriver */
         $authDriver = jAuth::getDriver();
         /** @var jFormsBase $form */
@@ -111,24 +118,20 @@ class multiauthListener extends jEventListener{
         $providerKey = $form->getData('auth_provider');
 
         $provider = $authDriver->getProviders()[$providerKey];
-        if ($provider->getFeature() & \Jelix\MultiAuth\ProviderPluginInterface::FEATURE_CHANGE_PASSWORD)
-        {
+        if ($provider->getFeature() & \Jelix\MultiAuth\ProviderPluginInterface::FEATURE_CHANGE_PASSWORD) {
             $id = str_replace(':', '_', $providerKey);
             $newPassword = $form->getData('password_'.$id);
             if ($newPassword !== null && trim($newPassword) !== '') {
                 $form->setData('password', $newPassword);
-            }
-            else {
+            } else {
                 $form->setErrorOn('password_'.$id, jLocale::get('multiauth~multiauth.message.bad.password'));
                 $event->add(array('check'=>false));
                 return;
             }
-        }
-        else {
+        } else {
             if ($provider->userExists($form->getData('login'))) {
                 $form->setData('password', '!!multiauth:'.$providerKey.'!!');
-            }
-            else {
+            } else {
                 $event->add(array('check'=>false));
                 $form->setErrorOn('auth_provider', jLocale::get('multiauth~multiauth.choice.provider.inexistant.user'));
                 return;
@@ -141,7 +144,8 @@ class multiauthListener extends jEventListener{
     /**
      * @param jEvent $event
      */
-    function onjauthdbAdminPrepareUpdate ($event) {
+    public function onjauthdbAdminPrepareUpdate($event)
+    {
         if (!$event->himself && jAcl2::check("auth.users.create")) {
             $this->prepareUserForm($event->form, false);
         }
@@ -150,7 +154,8 @@ class multiauthListener extends jEventListener{
     /**
      * @param jEvent $event
      */
-    function onjauthdbAdminEditUpdate ($event) {
+    public function onjauthdbAdminEditUpdate($event)
+    {
         if (!$event->himself && jAcl2::check("auth.users.create")) {
             $this->prepareUserForm($event->form, false);
         }
@@ -160,7 +165,8 @@ class multiauthListener extends jEventListener{
     /**
      * @param jEvent $event
      */
-    function onjauthdbAdminBeforeCheckUpdateForm ($event) {
+    public function onjauthdbAdminBeforeCheckUpdateForm($event)
+    {
         if (!$event->himself && jAcl2::check("auth.users.create")) {
             $this->prepareUserForm($event->form, false);
         }
@@ -169,7 +175,8 @@ class multiauthListener extends jEventListener{
     /**
      * @param jEvent $event
      */
-    function onjauthdbAdminCheckUpdateForm ($event) {
+    public function onjauthdbAdminCheckUpdateForm($event)
+    {
         if (!$event->himself && jAcl2::check("auth.users.create")) {
             /** @var multiauthAuthDriver $authDriver */
             $authDriver = jAuth::getDriver();
@@ -195,21 +202,18 @@ class multiauthListener extends jEventListener{
                 return;
             }
 
-            if ($provider->getFeature() & \Jelix\MultiAuth\ProviderPluginInterface::FEATURE_CHANGE_PASSWORD)
-            {
+            if ($provider->getFeature() & \Jelix\MultiAuth\ProviderPluginInterface::FEATURE_CHANGE_PASSWORD) {
                 $id = str_replace(':', '_', $providerKey);
                 $newPassword = $form->getData('password_'.$id);
                 if ($newPassword !== null && trim($newPassword) !== '') {
                     $form->setData('password', $newPassword);
                     $provider->changePassword($form->getData('login'), $newPassword);
-                }
-                else {
+                } else {
                     $form->setErrorOn('password_'.$id, jLocale::get('multiauth~multiauth.message.bad.password'));
                     $event->add(array('check'=>false));
                     return;
                 }
-            }
-            else {
+            } else {
                 $form->setData('password', '!!multiauth:'.$providerKey.'!!');
                 $authDriver->updateProviderInAccount($form->getData('login'), $providerKey);
             }

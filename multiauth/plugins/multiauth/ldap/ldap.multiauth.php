@@ -9,7 +9,6 @@
 
 use \Jelix\MultiAuth\ProviderAbstract;
 
-
 /**
  * authentication provider for the multiauth plugin
  *
@@ -19,8 +18,8 @@ use \Jelix\MultiAuth\ProviderAbstract;
  * @subpackage multiauth_provider
  * @internal see https://tools.ietf.org/html/rfc4510
  */
-class ldapProvider extends ProviderAbstract {
-
+class ldapProvider extends ProviderAbstract
+{
     protected $labelLocale = 'multiauth~multiauth.provider.ldap.label';
 
     /**
@@ -108,7 +107,8 @@ class ldapProvider extends ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function getFeature() {
+    public function getFeature()
+    {
         return self::FEATURE_SUPPORT_PASSWORD;
     }
 
@@ -411,7 +411,8 @@ class ldapProvider extends ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function userExists($login) {
+    public function userExists($login)
+    {
         $connectAdmin = $this->_bindLdapAdminUser();
         if (!$connectAdmin) {
             return false;
@@ -436,5 +437,4 @@ class ldapProvider extends ProviderAbstract {
         }
         return false;
     }
-
 }

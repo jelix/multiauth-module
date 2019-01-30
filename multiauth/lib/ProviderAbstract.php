@@ -8,8 +8,8 @@
  */
 namespace Jelix\MultiAuth;
 
-abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterface {
-
+abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterface
+{
     protected $labelLocale = '';
 
     protected $multiAuthKey = '';
@@ -20,7 +20,8 @@ abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterf
     protected $accountsDao;
     protected $accountsDaoProfile;
 
-    function __construct($params) {
+    public function __construct($params)
+    {
         $this->_params = $params;
         $this->passwordHashOptions = $params['password_hash_options'];
         $this->passwordHashMethod = $params['password_hash_method'];
@@ -35,22 +36,24 @@ abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterf
     {
         if (isset($this->_params['label'])) {
             return $this->_params['label'];
-        }
-        else if ($this->labelLocale) {
+        } elseif ($this->labelLocale) {
             return \jLocale::get($this->labelLocale);
         }
         return $this->multiAuthKey;
     }
 
-    function getRegisterKey() {
+    public function getRegisterKey()
+    {
         return $this->multiAuthKey;
     }
 
-    function setRegisterKey($key) {
+    public function setRegisterKey($key)
+    {
         $this->multiAuthKey = $key;
     }
 
-    public function getConfiguration() {
+    public function getConfiguration()
+    {
         return $this->_params;
     }
 
@@ -59,7 +62,8 @@ abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterf
      * @param string $password the password to hash
      * @return string the hash password
      */
-    public function cryptPassword($password, $forceOldHash = false) {
+    public function cryptPassword($password, $forceOldHash = false)
+    {
         if (!$forceOldHash && $this->passwordHashMethod) {
             return password_hash($password, $this->passwordHashMethod, $this->passwordHashOptions);
         }
@@ -72,8 +76,7 @@ abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterf
                     $f = substr($f, 2);
                     if ($t == '1') {
                         return $f((isset($this->_params['password_salt'])?$this->_params['password_salt']:''), $password);
-                    }
-                    else if ($t == '2') {
+                    } elseif ($t == '2') {
                         return $f($this->_params, $password);
                     }
                 }
@@ -89,7 +92,8 @@ abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterf
      * @return boolean|string false if password does not correspond. True if it is ok. A string
      * containing a new hash if it is ok and need to store a new hash
      */
-    public function checkPassword($givenPassword, $currentPasswordHash) {
+    public function checkPassword($givenPassword, $currentPasswordHash)
+    {
         if ($currentPasswordHash[0] == '$' && $this->passwordHashMethod) {
             // ok, we have hash for standard API, let's use standard API
             if (!password_verify($givenPassword, $currentPasswordHash)) {
@@ -98,10 +102,9 @@ abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterf
 
             // check if rehash is needed,
             if (password_needs_rehash($currentPasswordHash, $this->passwordHashMethod, $this->passwordHashOptions)) {
-                return password_hash($givenPassword, $this->passwordHashMethod,  $this->passwordHashOptions);
+                return password_hash($givenPassword, $this->passwordHashMethod, $this->passwordHashOptions);
             }
-        }
-        else {
+        } else {
             // verify with the old hash api
             if (!hash_equals($currentPasswordHash, $this->cryptPassword($givenPassword, true))) {
                 return false;
@@ -109,7 +112,7 @@ abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterf
 
             if ($this->passwordHashMethod) {
                 // if there is a method to hash with the standard API, let's rehash the password
-                return password_hash($givenPassword, $this->passwordHashMethod,  $this->passwordHashOptions);
+                return password_hash($givenPassword, $this->passwordHashMethod, $this->passwordHashOptions);
             }
         }
         return true;

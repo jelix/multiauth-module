@@ -16,14 +16,15 @@
  * @package    jelix
  * @subpackage multiauth_provider
  */
-class dbdaoProvider extends \Jelix\MultiAuth\ProviderAbstract {
-
+class dbdaoProvider extends \Jelix\MultiAuth\ProviderAbstract
+{
     protected $labelLocale = 'multiauth~multiauth.provider.dbdao.label';
 
     /**
      * @inheritdoc
      */
-    function __construct($params) {
+    public function __construct($params)
+    {
         parent::__construct($params);
         if (!isset($this->_params['profile'])) {
             $this->_params['profile'] = '';
@@ -33,7 +34,8 @@ class dbdaoProvider extends \Jelix\MultiAuth\ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function getFeature() {
+    public function getFeature()
+    {
         return self::FEATURE_CHANGE_PASSWORD |
             self::FEATURE_SUPPORT_PASSWORD;
     }
@@ -41,7 +43,8 @@ class dbdaoProvider extends \Jelix\MultiAuth\ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function changePassword($login, $newpassword){
+    public function changePassword($login, $newpassword)
+    {
         $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
         return $dao->updatePassword($login, $this->cryptPassword($newpassword));
     }
@@ -52,7 +55,8 @@ class dbdaoProvider extends \Jelix\MultiAuth\ProviderAbstract {
      * @param string $password
      * @return integer
      */
-    public function verifyAuthentication($userAccount, $login, $password){
+    public function verifyAuthentication($userAccount, $login, $password)
+    {
         if (trim($password) == '') {
             return self::VERIF_AUTH_BAD;
         }
@@ -79,7 +83,8 @@ class dbdaoProvider extends \Jelix\MultiAuth\ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function userExists($login) {
+    public function userExists($login)
+    {
         $daouser = jDao::get($this->_params['dao'], $this->_params['profile']);
         $userRec = $daouser->getByLogin($login);
         return !!$userRec;

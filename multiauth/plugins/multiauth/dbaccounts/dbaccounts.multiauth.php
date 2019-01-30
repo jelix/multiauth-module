@@ -16,15 +16,15 @@
  * @package    jelix
  * @subpackage multiauth_provider
  */
-class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
-
+class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract
+{
     protected $labelLocale = 'multiauth~multiauth.provider.dbaccounts.label';
 
     /**
      * @inheritdoc
      */
-    function __construct($params) {
-
+    public function __construct($params)
+    {
         parent::__construct($params);
         if (isset($this->_params['automaticAccountCreation'])) {
             unset($this->_params['automaticAccountCreation']);
@@ -34,7 +34,8 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function getFeature() {
+    public function getFeature()
+    {
         return self::FEATURE_CHANGE_PASSWORD | self::FEATURE_SUPPORT_PASSWORD |
             self::FEATURE_USE_MULTIAUTH_TABLE;
     }
@@ -42,7 +43,8 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function changePassword($login, $newpassword){
+    public function changePassword($login, $newpassword)
+    {
         $dao = jDao::get($this->accountsDao, $this->accountsDaoProfile);
         return $dao->updatePassword($login, $this->cryptPassword($newpassword));
     }
@@ -50,7 +52,8 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function verifyAuthentication($user, $login, $password){
+    public function verifyAuthentication($user, $login, $password)
+    {
         if (trim($password) == '') {
             return self::VERIF_AUTH_BAD;
         }
@@ -71,7 +74,8 @@ class dbaccountsProvider extends \Jelix\MultiAuth\ProviderAbstract {
     /**
      * @inheritdoc
      */
-    public function userExists($login) {
+    public function userExists($login)
+    {
         $dao = jDao::get($this->accountsDao, $this->accountsDaoProfile);
         return !!$dao->getByLogin($login);
     }

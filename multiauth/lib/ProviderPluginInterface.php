@@ -8,7 +8,8 @@
  */
 namespace Jelix\MultiAuth;
 
-interface ProviderPluginInterface {
+interface ProviderPluginInterface
+{
 
     /** password of a user can be changed */
     const FEATURE_CHANGE_PASSWORD = 1;
@@ -28,7 +29,7 @@ interface ProviderPluginInterface {
      * ProviderPluginInterface constructor.
      * @param array $params configuration parameters
      */
-    function __construct($params);
+    public function __construct($params);
 
     /**
      * @return string a label to display
