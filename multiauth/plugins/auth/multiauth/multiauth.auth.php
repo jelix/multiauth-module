@@ -36,6 +36,10 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
 
     public function __construct($params)
     {
+        if (property_exists(jApp::config(), 'multiauth') && is_array(jApp::config()->multiauth)) {
+            $params = array_merge($params, jApp::config()->multiauth);
+        }
+
         parent::__construct($params);
         if (!isset($this->_params['profile'])) {
             $this->_params['profile'] = '';
@@ -66,8 +70,20 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
                 }
                 if (strpos($providerInfo, ':') !== false) {
                     list($provider, $providerSection) = explode(':', $providerInfo);
+
+                    $sectionFound = false;
                     if (isset($config[$providerSection]) && is_array($config[$providerSection])) {
                         $providerConfig = array_merge($providerConfig, $config[$providerSection]);
+                        $sectionFound = true;
+                    }
+
+                    if (property_exists(jApp::config(), $providerSection)) {
+                        $providerConfig = array_merge($providerConfig, jApp::config()->$providerSection);
+                        $sectionFound = true;
+                    }
+
+                    if (!$sectionFound) {
+                        throw new Exception("Section '$providerSection' to configure the provider '$provider' for multiauth, is missing");
                     }
                 } else {
                     $provider = $providerInfo;

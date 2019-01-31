@@ -60,6 +60,9 @@ php yourapp/install/installer.php
 Configuration
 =============
 
+using the `auth.coord.ini.php`
+------------------------------
+
 You must modify the configuration file `auth.coord.ini.php`.
  
 First, set `driver=multiauth`.
@@ -121,10 +124,37 @@ the `multiauth_ldap` section. You should then have :
 ldapprofile = "multiauthldap"
 ```
 
+For `dbaccounts`, no configuration section indicated, as it is not configurable.
+
+
+using the `localconfig.ini.php`
+-------------------------------
+
+You may want to change some values of the configuration from `auth.coord.ini.php`,
+in a specific instance of your application. The multiauth plugin is able to
+load its configuration from the `localconfig.ini.php` in addition from,
+`auth.coord.ini.php`, so you want have to modify `auth.coord.ini.php`.
+
+In your `localconfig.ini.php`, create a section `multiauth`. It can contains
+all parameters that you can set into the `multiauth` of `auth.coord.ini.php`.
+The parameters from `localconfig.ini.php` overwrites parameters from `auth.coord.ini.php`.
+
+Same behavior for provider configuration section. 
+
+Configuring ldap provider
+-------------------------
+
 See LDAP.md to know how to fill a configuration for the ldap plugin.
+
+Configuring dbaccounts provider
+--------------------------------
 
 The `dbaccounts` plugin does not need configuration, this is why there is
 no a section name.
+
+
+Configuring dbdao provider
+--------------------------
 
 The `dbdao` plugin needs a simple configuration section containing a `dao` and
 a `profile` parameter, needed to access to the table containing login/password.
@@ -140,7 +170,10 @@ dao="main~central_auth_db"
 profile="centraldb" 
 ```
 
-Note that you can use a provider several time. For example, you may want to
+Using the same provider multiple time
+-------------------------------------
+
+You can use a provider several times. For example, you may want to
 use two different ldap to authenticate your users:
 
 ```ini
@@ -156,5 +189,4 @@ ldapprofile = "ldapserver1"
 [ldapserver2]
 ldapprofile = "ldapserver2"
 ```
-
 
