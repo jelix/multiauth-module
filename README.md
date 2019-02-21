@@ -133,7 +133,7 @@ using the `localconfig.ini.php`
 You may want to change some values of the configuration from `auth.coord.ini.php`,
 in a specific instance of your application. The multiauth plugin is able to
 load its configuration from the `localconfig.ini.php` in addition from,
-`auth.coord.ini.php`, so you want have to modify `auth.coord.ini.php`.
+`auth.coord.ini.php`, so you don't have to modify `auth.coord.ini.php`.
 
 In your `localconfig.ini.php`, create a section `multiauth`. It can contains
 all parameters that you can set into the `multiauth` of `auth.coord.ini.php`.

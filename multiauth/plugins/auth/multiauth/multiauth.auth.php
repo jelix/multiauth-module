@@ -232,15 +232,21 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
                 if (isset($this->providers[$m[1]])) {
                     $providers = array($m[1] => $this->providers[$m[1]]);
                 }
-            } elseif ($this->dbAccountProvider) {
+            } elseif ($this->dbAccountProvider &&
+                !preg_match("/^[\\-!]{2}/", $user->password) && // ldapdao stored '!!ldapdao password!!' and jcas stored '--no password--'
+                $user->password != 'no password' &&
+                $user->password != ''
+            ) {
                 // this is an internal provider, a db account provider
                 $providers = array($this->dbAccountProvider->getRegisterKey() => $this->dbAccountProvider);
             }
         }
 
         foreach ($providers as $pKey => $provider) {
-            $useAccountTableForPassword = (($provider->getFeature() & ProviderPluginInterface::FEATURE_USE_MULTIAUTH_TABLE)
-                || get_class($provider) == 'dbaccountsProvider');
+            $useAccountTableForPassword = (
+                ($provider->getFeature() & ProviderPluginInterface::FEATURE_USE_MULTIAUTH_TABLE)
+                || get_class($provider) == 'dbaccountsProvider'
+            );
 
             if ($useAccountTableForPassword && $createdUser) {
                 // it does not make sens to check the password of an inexistant
