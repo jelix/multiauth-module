@@ -31,6 +31,8 @@ class ldapProvider extends ProviderAbstract
         "name"=>"firstname"
     );
 
+    protected $uriConnect = '';
+
     /**
      * @inheritdoc
      */
@@ -52,6 +54,7 @@ class ldapProvider extends ProviderAbstract
         $_default_params = array(
             'hostname'      =>  'localhost',
             'port'          =>  389,
+            'tlsMode'       => '',
             'adminUserDn'      =>  null,
             'adminPassword'      =>  null,
             'protocolVersion'   =>  3,
@@ -101,6 +104,26 @@ class ldapProvider extends ProviderAbstract
         }
         if (!is_array($this->_params['bindUserDN'])) {
             $this->_params['bindUserDN'] = array($this->_params['bindUserDN']);
+        }
+
+        $uri = $this->_params['hostname'].':'.$this->_params['port'];
+
+        if (preg_match('!^ldap(s?)://!', $uri, $m)) { // old way to specify ldaps protocol
+            if (isset($m[1]) && $m[1] == 's') {
+                $this->_params['tlsMode'] = 'ldaps';
+            }
+            elseif ($this->_params['tlsMode'] == 'ldaps') {
+                $this->_params['tlsMode'] = 'starttls';
+            }
+        }
+        else {
+            if ($this->_params['tlsMode'] == 'ldaps' || $this->_params['port'] == 636 ) {
+                $this->uriConnect = 'ldaps://'.$uri;
+                $this->_params['tlsMode'] = 'ldaps';
+            }
+            else {
+                $this->uriConnect = 'ldap://'.$uri;
+            }
         }
     }
 
@@ -370,9 +393,16 @@ class ldapProvider extends ProviderAbstract
      */
     protected function _getLinkId()
     {
-        if ($connect = ldap_connect($this->_params['hostname'], $this->_params['port'])) {
+        if ($connect = ldap_connect($this->uriConnect)) {
             ldap_set_option($connect, LDAP_OPT_PROTOCOL_VERSION, $this->_params['protocolVersion']);
             ldap_set_option($connect, LDAP_OPT_REFERRALS, 0);
+
+            if ($this->_params['tlsMode'] == 'starttls') {
+                if (!ldap_start_tls($connect)) {
+                    jLog::log('ldapdao: connection error: impossible to start TLS connection: '.ldap_errno($connect).':'.ldap_error($connect), 'auth');
+                    return false;
+                }
+            }
             return $connect;
         }
         return false;

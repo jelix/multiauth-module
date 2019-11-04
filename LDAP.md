@@ -25,12 +25,15 @@ ldapprofile = "myldap"
 
 ```
 
-The profile itself must be set into the `var/config/profiles.ini.php` file.
 
-Into this profile, you should set `hostname`, `port`. You must also indicate 
-in `adminUserDn` and `adminPassword`, the DN (Distinguished Name) and the 
-password of the user that have enough rights to query the directory (to search a 
-user, to get his attributes, his groups etc...).
+Connection configuration
+------------------------
+
+You should create an ldap profile, with the name indicated into the `ldapprofile`
+parameter. The ldap profile should be into the `var/config/profiles.ini.php` file.
+
+For example, if the profile is named `myldap` (like in the following example), 
+so you should set `ldapprofile=myldap` into `authldap.coord.ini.php`.
 
 Example of a profile for the ldap connection:
 
@@ -38,6 +41,7 @@ Example of a profile for the ldap connection:
 [ldap:myldap]
 hostname=localhost
 port=389
+tlsMode=starttls  ; empty, "starttls" or "ldaps" (ldaps by default if port 636)
 adminUserDn="cn=admin,ou=admins,dc=acme"
 adminPassword="Sup3rP4ssw0rd"
 searchUserBaseDN="dc=XY,dc=fr"
@@ -49,10 +53,34 @@ searchGroupProperty="cn"
 searchGroupBaseDN=""
 ```
 
-Here the profile is named `myldap` so you should set `ldapprofile=myldap` into
-`authldap.coord.ini.php`.
+First, you should set `hostname`, `port`, which are the name and the port of
+the ldap server.
 
-If you want to use SSL for the ldap connection, try `hostname=ldaps://my.server/`.
+You must also indicate how the connexion should be made. You should indicate 
+if you are using the ldap protocol without encryption (`tlsmode=`), the ldap 
+protocol with STARTTLS, (`tlsMode=starttls`) or if you are using the ldaps 
+protocol (`tlsMode=ldaps`).
+
+If you use the standard port 389, you have the choice between no encryption (empty value)
+or `starttls`, for the `tlsMode` setting.
+
+If you are using the port 636, it automatically uses the ldaps protocol. In this
+case, setting `tlsMode` to `ldaps` is optional.
+
+Since ldaps is deprecated in OpenLdap, the best solution is to use the port 389
+with `tlsMode=starttls`.
+
+
+
+Configuration properties for the admin
+--------------------------------------
+
+The plugin needs to query the directory with a user having some rights allowing 
+to search a user, to get his attributes, his groups etc... He's called the "admin" 
+in the plugin.
+
+You must indicate in `adminUserDn` and `adminPassword`, the DN (Distinguished Name) 
+and the password of this user. 
 
 
 
