@@ -133,11 +133,11 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
     public function updateUser($user)
     {
         if (!is_object($user)) {
-            throw new jException('ldapdao~errors.object.user.unknown');
+            throw new jException('multiauth~ldap.error.object.user.unknown');
         }
 
         if ($user->login == '') {
-            throw new jException('ldapdao~errors.user.login.unset');
+            throw new jException('multiauth~ldap.error.user.login.unset');
         }
         $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
         $dao->update($user);
