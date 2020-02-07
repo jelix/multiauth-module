@@ -19,8 +19,12 @@ class multiauthListener extends jEventListener
             $login = $event->form->getData('login');
             $password = $event->form->getData('password');
 
+            $driver = jAuth::getDriver();
+            if (get_class($driver) != 'multiauthAuthDriver') {
+                return;
+            }
             /** @var \Jelix\MultiAuth\ProviderPluginInterface $provider */
-            $provider = jAuth::getDriver()->getProviderForLogin($login, $password);
+            $provider = $driver->getProviderForLogin($login, $password);
             if ($provider) {
                 $text = jLocale::get('multiauth~multiauth.user.provider.use', $provider->getLabel());
                 $event->add('<p>'.htmlspecialchars($text).'</p>');
@@ -111,6 +115,9 @@ class multiauthListener extends jEventListener
     {
         /** @var multiauthAuthDriver $authDriver */
         $authDriver = jAuth::getDriver();
+        if (get_class($authDriver) != 'multiauthAuthDriver') {
+            return;
+        }
         /** @var jFormsBase $form */
         $form = $event->form;
         $form->getControl('password')->deactivate(false);
@@ -180,6 +187,9 @@ class multiauthListener extends jEventListener
         if (!$event->himself && jAcl2::check("auth.users.create")) {
             /** @var multiauthAuthDriver $authDriver */
             $authDriver = jAuth::getDriver();
+            if (get_class($authDriver) != 'multiauthAuthDriver') {
+                return;
+            }
             /** @var jFormsBase $form */
             $form = $event->form;
             $form->getControl('password')->deactivate(false);
