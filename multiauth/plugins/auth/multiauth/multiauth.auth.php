@@ -260,6 +260,15 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
             if ($result & ProviderPluginInterface::VERIF_AUTH_OK ||
                 $result & ProviderPluginInterface::VERIF_AUTH_OK_USER_TO_UPDATE
             ) {
+                if ($createdUser) {
+                    // sometimes a provider may change the login field by the same
+                    // login but with a different letter case. So let's retry
+                    // to get the user with this "new" login name
+                    if ($dao->getByLogin($user->login)) {
+                        $createdUser = false;
+                    }
+                }
+
                 if (!$useAccountTableForPassword) {
                     $pass = '!!multiauth:'.$provider->getRegisterKey().'!!';
                     if ($user->password != $pass) {

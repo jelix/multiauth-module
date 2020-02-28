@@ -325,7 +325,7 @@ class ldapProvider extends ProviderAbstract
         }
 
         foreach ($mapping as $ldapAttr => $objAttr) {
-            if ($objAttr != '' && !isset($user->$objAttr)) {
+            if ($objAttr != '' && $objAttr != 'login'  && $objAttr != 'password' && !isset($user->$objAttr)) {
                 $user->$objAttr = '';
             }
         }
