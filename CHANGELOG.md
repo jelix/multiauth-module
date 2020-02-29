@@ -1,6 +1,13 @@
 Changes
 =======
 
+v1.1.1
+------
+
+- fix an issue when login with ldap and having ldap login not in the same case
+  as the login given by the user.
+- installer for Jelix 1.7+
+
 v1.1.0
 ------
 
