@@ -3,28 +3,23 @@
  * @author    Laurent Jouanneau
  * @copyright   2019-2020 Laurent Jouanneau
  */
+use Jelix\IniFile\IniModifierInterface;
+use Jelix\Installer\Module\API\DatabaseHelpers;
+use Jelix\Installer\Module\API\InstallHelpers;
+use Jelix\Installer\EntryPoint;
 
-
-class multiauthModuleInstaller extends jInstallerModule
+class multiauthModuleInstaller extends \Jelix\Installer\Module\Installer
 {
-    public function install()
+    public function install(InstallHelpers $helpers)
     {
-        $authConfig = $this->getAuthConf();
+        $entryPoint = $helpers->getMainEntryPoint();
 
-        if ($this->firstExec('acl2')) {
-            if ($authConfig['driver'] == 'ldapdao') {
-                // we had ldapdao, let's update some things
-                $this->restoreRights();
-                $this->updatePasswordField($authConfig['ldapdao']['dao'], $authConfig['ldapdao']['profile']);
-            }
-        }
+        $authConfig = $this->getAuthConf($entryPoint->getConfigIni());
 
-        $appConfig = $this->getAppConfig();
-        $appConfig->setValue('driver', 'multiauth', 'coordplugin_auth');
-        $appConfig->save();
-
-        if (!$this->getParameter('noconfigfile')) {
-            $this->copyFile('auth_multi.coord.ini.php', 'config:auth_multi.coord.ini.php', false);
+        if ($authConfig['driver'] == 'ldapdao') {
+            // we had ldapdao, let's update some things
+            $this->restoreRights();
+            $this->updatePasswordField($authConfig['ldapdao']['dao'], $authConfig['ldapdao']['profile']);
         }
     }
 
@@ -59,19 +54,10 @@ class multiauthModuleInstaller extends jInstallerModule
             ' WHERE '.$cnx->encloseName($passwordField).' = '.$cnx->quote('!!ldapdao password!!'));
     }
 
-    protected function getAppConfig() {
-        if ($this->getParameter('localconfig')) {
-            $appConfig = $this->entryPoint->localConfigIni->getMaster();
-        } else {
-            $appConfig = $this->entryPoint->configIni->getMaster();
-        }
-        return $appConfig;
-    }
-
-    protected function getAuthConf()
+    protected function getAuthConf(IniModifierInterface $configIni)
     {
-        $authconfig = $this->config->getValue('auth', 'coordplugins');
-        $confPath = jApp::configPath($authconfig);
+        $authconfig = $configIni->getValue('auth', 'coordplugins');
+        $confPath = jApp::appSystemPath($authconfig);
         $confIni = parse_ini_file($confPath, true);
         return jAuth::loadConfig($confIni);
     }
