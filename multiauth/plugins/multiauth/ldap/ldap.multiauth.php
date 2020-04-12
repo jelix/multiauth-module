@@ -190,8 +190,8 @@ class ldapProvider extends ProviderAbstract
 
         if ($userDn === false) {
             jLog::log('multiauth ldap: cannot authenticate to ldap with given bindUserDN for the login ' . $login. '. Wrong DN or password', 'auth');
-            foreach ($this->bindUserDnTries as $dn) {
-                jLog::log('multiauth ldap:  tried to connect with bindUserDN=' . $dn, 'auth');
+            foreach ($this->bindUserDnTries as $erroMessage) {
+                jLog::log($erroMessage, 'auth');
             }
             return self::VERIF_AUTH_BAD;
         }
@@ -252,6 +252,7 @@ class ldapProvider extends ProviderAbstract
     protected function searchLdapUserAttributes($connect, $login, $user)
     {
         $searchAttributes = array_keys($this->_params['searchAttributes']);
+        $filters = array();
         foreach ($this->_params['searchUserFilter'] as $searchUserFilter) {
             $filter = str_replace(
                 array('%%LOGIN%%', '%%USERNAME%%'), // USERNAME deprecated
@@ -264,11 +265,19 @@ class ldapProvider extends ProviderAbstract
                 $filter,
                 $searchAttributes
             );
-            if ($search && ($entry = ldap_first_entry($connect, $search))) {
+            if (!$search) {
+                $this->logLdapError($connect, 'ldap error during search of the user "'.$login.'" with the filter "'.$filter.'"');
+            }
+            else if (($entry = ldap_first_entry($connect, $search))) {
                 $attributes = ldap_get_attributes($connect, $entry);
                 return $this->readLdapAttributes($attributes, $user);
             }
+            else {
+                $filters[] = $filter;
+            }
         }
+        jLog::log('multiauth ldap error: ldap user "'.$login.'" not found with the filters :"'.implode('", "', $filters).'"', 'auth');
+
         return false;
     }
 
@@ -306,8 +315,7 @@ class ldapProvider extends ProviderAbstract
             if ($bind) {
                 break;
             } else {
-                jLog::log('multiauth ldap: error when trying to connect with '.$realDn.': '.ldap_errno($connect).':'.ldap_error($connect), 'auth');
-                $this->bindUserDnTries[] = $realDn;
+                $this->bindUserDnTries[] = $this->getLdapError($connect, 'tried to connect with "'.$realDn.'"');
             }
         }
         return ($bind ? $realDn : false);
@@ -380,14 +388,14 @@ class ldapProvider extends ProviderAbstract
         $grpProp = $this->_params['searchGroupProperty'];
 
         $groups = array();
-        $search = ldap_search(
+        $search = @ldap_search(
             $connect,
             $this->_params['searchGroupBaseDN'],
             $filter,
             array($grpProp)
         );
         if ($search) {
-            $entry = ldap_first_entry($connect, $search);
+            $entry = @ldap_first_entry($connect, $search);
             if ($entry) {
                 do {
                     $attributes = ldap_get_attributes($connect, $entry);
@@ -396,6 +404,12 @@ class ldapProvider extends ProviderAbstract
                     }
                 } while ($entry = ldap_next_entry($connect, $entry));
             }
+            else {
+                jLog::log('multiauth ldap: no groups found for the user  "'.$login.'", with the searchGroupFilter query "'.$filter.'"', 'auth');
+            }
+        }
+        else {
+            $this->logLdapError($connect, 'ldap error during group search for "'.$login.'", with the searchGroupFilter query "'.$filter.'"');
         }
         return $groups;
     }
@@ -405,18 +419,20 @@ class ldapProvider extends ProviderAbstract
      */
     protected function _getLinkId()
     {
-        if ($connect = ldap_connect($this->uriConnect)) {
+        if ($connect = @ldap_connect($this->uriConnect)) {
+            //ldap_set_option(NULL, LDAP_OPT_DEBUG_LEVEL, 7);
             ldap_set_option($connect, LDAP_OPT_PROTOCOL_VERSION, $this->_params['protocolVersion']);
             ldap_set_option($connect, LDAP_OPT_REFERRALS, 0);
 
             if ($this->_params['tlsMode'] == 'starttls') {
                 if (!ldap_start_tls($connect)) {
-                    jLog::log('ldapdao: connection error: impossible to start TLS connection: '.ldap_errno($connect).':'.ldap_error($connect), 'auth');
+                    $this->logLdapError($connect, 'connection error: impossible to start TLS connection');
                     return false;
                 }
             }
             return $connect;
         }
+        jLog::log('multiauth ldap error: bad syntax in the given uri "'.$this->uriConnect.'"', 'auth');
         return false;
     }
 
@@ -434,9 +450,9 @@ class ldapProvider extends ProviderAbstract
         }
 
         if ($this->_params['adminUserDn'] == '') {
-            $bind = ldap_bind($connect);
+            $bind = @ldap_bind($connect);
         } else {
-            $bind = ldap_bind($connect, $this->_params['adminUserDn'], $this->_params['adminPassword']);
+            $bind = @ldap_bind($connect, $this->_params['adminUserDn'], $this->_params['adminPassword']);
         }
         if (!$bind) {
             if ($this->_params['adminUserDn'] == '') {
@@ -459,7 +475,7 @@ class ldapProvider extends ProviderAbstract
         if (!$connectAdmin) {
             return false;
         }
-
+        $filters = array();
         // see if the user exists into the ldap directory
         foreach ($this->_params['searchUserFilter'] as $searchUserFilter) {
             $filter = str_replace(
@@ -473,10 +489,33 @@ class ldapProvider extends ProviderAbstract
                 $filter,
                 array('dn')
             );
-            if ($search && ($entry = ldap_first_entry($connectAdmin, $search))) {
+            if (!$search) {
+                $this->logLdapError($connectAdmin, 'ldap error during search of the user "'.$login.'" with the filter "'.$filter.'"');
+            }
+            else if (($entry = ldap_first_entry($connectAdmin, $search))) {
                 return true;
             }
+            else {
+                $filters[] = $filter;
+            }
         }
+        //jLog::log('ldapdao error: ldap user "'.$login.'" not found with the filters :"'.implode('", "', $filters).'"', 'auth');
         return false;
     }
+
+    protected function getLdapError($connect, $contextMessage)
+    {
+        $message = "multiauth ldap error: $contextMessage \n";
+        $message .= "\tldap error " . ldap_errno($connect) . ':' . ldap_error($connect);
+        if (@ldap_get_option($connect, LDAP_OPT_DIAGNOSTIC_MESSAGE, $diagnostic)) {
+            $message .= "\n\t" . $diagnostic;
+        }
+        return $message;
+    }
+
+    protected function logLdapError($connect, $contextMessage)
+    {
+        jLog::log($this->getLdapError($connect, $contextMessage), 'auth');
+    }
+
 }
