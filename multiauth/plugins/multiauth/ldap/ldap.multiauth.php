@@ -176,12 +176,14 @@ class ldapProvider extends ProviderAbstract
         $userLdapAttributes = $this->searchLdapUserAttributes($connectAdmin, $login, $user);
         if ($userLdapAttributes === false) {
             jLog::log('multiauth ldap: user '.$login.' not found into the ldap', 'auth');
+            ldap_close($connectAdmin);
             return self::VERIF_AUTH_BAD;
         }
 
         $connect = $this->_getLinkId();
         if (!$connect) {
             jLog::log('multiauth ldap: impossible to connect to ldap', 'auth');
+            ldap_close($connectAdmin);
             return self::VERIF_AUTH_BAD;
         }
         // authenticate user. let's try with all configured DN
@@ -193,6 +195,7 @@ class ldapProvider extends ProviderAbstract
             foreach ($this->bindUserDnTries as $erroMessage) {
                 jLog::log($erroMessage, 'auth');
             }
+            ldap_close($connectAdmin);
             return self::VERIF_AUTH_BAD;
         }
 
