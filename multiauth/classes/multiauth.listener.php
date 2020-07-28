@@ -32,6 +32,13 @@ class multiauthListener extends jEventListener
         }
     }
 
+    protected function isResetPasswordEnabled() {
+        if (jApp::isModuleEnabled('jcommunity') && class_exists("\Jelix\JCommunity\Config")) {
+            $config = new \Jelix\JCommunity\Config();
+            return $config->isResetAdminPasswordEnabledForAdmin();
+        }
+        return false;
+    }
 
     /**
      * @param jFormsBase $form
@@ -49,13 +56,25 @@ class multiauthListener extends jEventListener
             $userProvider = $authDriver->getDbAccountProvider();
         }
 
+        $isResetPasswordEnabled = $this->isResetPasswordEnabled();
+
         $choice = new jFormsControlChoice('auth_provider');
         $choice->label = jLocale::get('multiauth~multiauth.choice.provider.label');
 
         $providers = $authDriver->getProviders();
+
         foreach ($providers as $pName => $provider) {
             $choice->createItem($pName, $provider->getLabel());
+
+            // display password field only if:
+            // - the provider allow to setup a password
+            // - and the password should be setup directly (no mail to reset the password)
+            // - and this is a form to create a user or if the provider to choice
+            //   is not the current provider used for the user (in this case,
+            //   the password should be changed in an other way)
             if ($provider->getFeature() & \Jelix\MultiAuth\ProviderPluginInterface::FEATURE_CHANGE_PASSWORD
+                &&
+                !$isResetPasswordEnabled
                 &&
                 ($createForm || (
                     $userProvider && $provider->getRegisterKey() != $userProvider->getRegisterKey()
@@ -116,6 +135,10 @@ class multiauthListener extends jEventListener
         /** @var multiauthAuthDriver $authDriver */
         $authDriver = jAuth::getDriver();
         if (get_class($authDriver) != 'multiauthAuthDriver') {
+            return;
+        }
+
+        if ($this->isResetPasswordEnabled()) {
             return;
         }
         /** @var jFormsBase $form */
@@ -190,6 +213,7 @@ class multiauthListener extends jEventListener
             if (get_class($authDriver) != 'multiauthAuthDriver') {
                 return;
             }
+
             /** @var jFormsBase $form */
             $form = $event->form;
             $form->getControl('password')->deactivate(false);
@@ -213,15 +237,27 @@ class multiauthListener extends jEventListener
             }
 
             if ($provider->getFeature() & \Jelix\MultiAuth\ProviderPluginInterface::FEATURE_CHANGE_PASSWORD) {
-                $id = str_replace(':', '_', $providerKey);
-                $newPassword = $form->getData('password_'.$id);
-                if ($newPassword !== null && trim($newPassword) !== '') {
-                    $form->setData('password', $newPassword);
-                    $provider->changePassword($form->getData('login'), $newPassword);
-                } else {
-                    $form->setErrorOn('password_'.$id, jLocale::get('multiauth~multiauth.message.bad.password'));
-                    $event->add(array('check'=>false));
-                    return;
+
+                if ($this->isResetPasswordEnabled()) {
+                    $pwd = $form->getData('password');
+                    if (strpos($pwd, '!!multiauth:')=== 0) {
+                        $newPassword = \jAuth::getRandomPassword();
+                        $form->setData('password', $newPassword);
+                        $provider->changePassword($form->getData('login'), $newPassword);
+                        jMessage::add(jLocale::get('multiauth~multiauth.account.update.reset.password'), 'warning');
+                    }
+                }
+                else {
+                    $id = str_replace(':', '_', $providerKey);
+                    $newPassword = $form->getData('password_'.$id);
+                    if ($newPassword !== null && trim($newPassword) !== '') {
+                        $form->setData('password', $newPassword);
+                        $provider->changePassword($form->getData('login'), $newPassword);
+                    } else {
+                        $form->setErrorOn('password_'.$id, jLocale::get('multiauth~multiauth.message.bad.password'));
+                        $event->add(array('check'=>false));
+                        return;
+                    }
                 }
             } else {
                 $form->setData('password', '!!multiauth:'.$providerKey.'!!');
