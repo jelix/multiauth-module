@@ -1,6 +1,13 @@
 Changes
 =======
 
+v1.1.2
+------
+
+- Fix support of reset password by mail during user update/creation, when using the jCommunity module
+- More verbosity in logs when something fails during ldap authentication
+- Fix the support of the port for the connection to a ldap server.
+
 v1.1.1
 ------
 
