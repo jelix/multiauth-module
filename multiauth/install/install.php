@@ -16,11 +16,22 @@ class multiauthModuleInstaller extends \Jelix\Installer\Module\Installer
 
         $authConfig = $this->getAuthConf($entryPoint->getConfigIni());
 
-        if ($authConfig['driver'] == 'ldapdao') {
-            // we had ldapdao, let's update some things
-            $this->restoreRights();
-            $this->updatePasswordField($authConfig['ldapdao']['dao'], $authConfig['ldapdao']['profile']);
+        // in case we had ldapdao, let's update some things
+        $this->restoreRights();
+        if (array_key_exists('ldapdao', $authConfig) &&
+            array_key_exists('dao', $authConfig['ldapdao']) &&
+            $authConfig['ldapdao']['dao'] !== ''
+        ) {
+            if (array_key_exists('profile', $authConfig['ldapdao'])) {
+                $profile = $authConfig['ldapdao']['profile'];
+            }
+            else {
+                $profile = '';
+            }
+
+            $this->updatePasswordField($authConfig['ldapdao']['dao'], $profile);
         }
+
     }
 
 
@@ -48,10 +59,18 @@ class multiauthModuleInstaller extends \Jelix\Installer\Module\Installer
         $table = $userDao->getTables()[$tableAlias]['realname'];
         $passwordField = $userDao->getProperties()['password']['fieldName'];
 
-        $cnx = jDb::getConnection($daoProfile);
-        $cnx->exec('UPDATE '.$cnx->encloseName($table).
-            ' SET '.$cnx->encloseName($passwordField).' = '.$cnx->quote('!!multiauth:ldap:multiauth_ldap!!').' '.
-            ' WHERE '.$cnx->encloseName($passwordField).' = '.$cnx->quote('!!ldapdao password!!'));
+        try {
+            $cnx = jDb::getConnection($daoProfile);
+            $cnx->exec('UPDATE '.$cnx->encloseName($table).
+                ' SET '.$cnx->encloseName($passwordField).' = '.$cnx->quote('!!multiauth:ldap:multiauth_ldap!!').' '.
+                ' WHERE '.$cnx->encloseName($passwordField).' = '.$cnx->quote('!!ldapdao password!!'));
+
+        }
+        catch (Exception $e) {
+            echo "\nWARNING: user table not updated to migrate from ldapdao to multiauth, because of this error:\n";
+            echo $e->getMessage();
+            echo "\n";
+        }
     }
 
     protected function getAuthConf(IniModifierInterface $configIni)

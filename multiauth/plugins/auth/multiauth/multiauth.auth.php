@@ -185,6 +185,18 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
             }
             return false;
         }
+        else if ($user->password === '!!ldapdao password!!') {
+            // in case of not updated user table after a migration from ldapdao, use the first ldap provider
+            foreach ($this->providers as $provider) {
+                if (get_class($provider) == 'ldapProvider') {
+                    if ($provider->getFeature() & ProviderPluginInterface::FEATURE_CHANGE_PASSWORD) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            return false;
+        }
         return true;
     }
 
@@ -197,6 +209,18 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
             if (isset($this->providers[$m[1]])) {
                 $provider = $this->providers[$m[1]];
             } else {
+                $provider = null;
+            }
+        } else if ($user->password === '!!ldapdao password!!') {
+            // in case of not updated user table after a migration from ldapdao, use the first ldap provider
+            $found = false;
+            foreach ($this->providers as $provider) {
+                if (get_class($provider) == 'ldapProvider') {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
                 $provider = null;
             }
         } else {
@@ -331,9 +355,15 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
                 return $this->providers[$m[1]];
             }
             return null;
-        } else {
-            return $this->dbAccountProvider;
+        } else if ($password === '!!ldapdao password!!') {
+            // in case of not updated user table after a migration from ldapdao, return the first ldap provider
+            foreach ($this->providers as $provider) {
+                if (get_class($provider) == 'ldapProvider') {
+                    return $provider;
+                }
+            }
         }
+        return $this->dbAccountProvider;
     }
 
     /**

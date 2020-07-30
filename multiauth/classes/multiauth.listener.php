@@ -240,7 +240,7 @@ class multiauthListener extends jEventListener
 
                 if ($this->isResetPasswordEnabled()) {
                     $pwd = $form->getData('password');
-                    if (strpos($pwd, '!!multiauth:')=== 0) {
+                    if (strpos($pwd, '!!multiauth:') === 0 || $pwd == '!!ldapdao password!!') {
                         $newPassword = \jAuth::getRandomPassword();
                         $form->setData('password', $newPassword);
                         $provider->changePassword($form->getData('login'), $newPassword);
