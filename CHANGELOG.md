@@ -1,6 +1,11 @@
 Changes
 =======
 
+v1.1.3
+------
+
+- Fix support of ldapdao password field in case the migration did not occured
+
 v1.1.2
 ------
 
