@@ -1,6 +1,11 @@
 Changes
 =======
 
+next
+-----
+
+- more log for ldap connection in case of problems.
+
 v1.1.3
 ------
 

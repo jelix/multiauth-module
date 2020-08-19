@@ -296,6 +296,7 @@ class ldapProvider extends ProviderAbstract
                 if (isset($userAttributes[$dnAttribute])) {
                     $realDn = $userAttributes[$dnAttribute];
                 } else {
+                    jLog::log('multiauth ldap bindUser notice: attribute '.$dnAttribute.' not found into user attributes', 'auth');
                     continue;
                 }
             } elseif (preg_match_all('/(\w+)=%\?%/', $dn, $m)) {
@@ -304,6 +305,7 @@ class ldapProvider extends ProviderAbstract
                     if (isset($userAttributes[$attr])) {
                         $realDn = str_replace($m[0][$k], $attr.'='.$userAttributes[$attr], $realDn);
                     } else {
+                        jLog::log('multiauth ldap bindUser notice: attribute '.$attr.' not found into user attributes', 'auth');
                         continue 2;
                     }
                 }
@@ -458,6 +460,7 @@ class ldapProvider extends ProviderAbstract
             $bind = @ldap_bind($connect, $this->_params['adminUserDn'], $this->_params['adminPassword']);
         }
         if (!$bind) {
+            $this->logLdapError($connect, 'admin bind failed');
             if ($this->_params['adminUserDn'] == '') {
                 jLog::log('multiauth ldap: impossible to authenticate to ldap as anonymous admin user', 'auth');
             } else {
