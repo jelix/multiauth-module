@@ -6,12 +6,13 @@
         <description lang="en_US">It allows to check authentication against several
            login/password providers : ldap, database etc.</description>
         <license>MIT</license>
-        <copyright>2019-2021 Laurent Jouanneau</copyright>
+        <copyright>2019-2022 Laurent Jouanneau</copyright>
         <creator name="Laurent Jouanneau" email="laurent@jelix.org" />
         <homepageURL>http://jelix.org</homepageURL>
     </info>
     <dependencies>
-        <jelix minversion="1.6.21" maxversion="1.7.*"/>
+        <jelix minversion="1.6.21" maxversion="1.8.*"/>
+        <module name="jacl2db" />
         <choice>
             <modules>
                 <module name="jauth"/>
