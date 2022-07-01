@@ -49,9 +49,9 @@ function cleanApp() {
     touch $APPDIR/var/mails/.dummy && chown $APP_USER:$APP_GROUP $APPDIR/var/mails/.dummy
     touch $APPDIR/var/uploads/.dummy && chown $APP_USER:$APP_GROUP $APPDIR/var/uploads/.dummy
 
-    #if [ -f $APPDIR/var/config/installer.ini.php ]; then
+    if [ -f $APPDIR/var/config/installer.ini.php ]; then
         rm -f $APPDIR/var/config/installer.ini.php
-    #fi
+    fi
     if [ -f $APPDIR/var/config/installer.bak.ini.php ]; then
         rm -f $APPDIR/var/config/installer.bak.ini.php
     fi
@@ -86,7 +86,7 @@ function resetApp() {
 }
 
 function launchInstaller() {
-    su $APP_USER -c "php $APPDIR/install/installer.php"
+    su $APP_USER -c "php $APPDIR/install/installer.php --verbose"
 }
 
 function setRights() {

@@ -425,7 +425,7 @@ class ldapProvider extends ProviderAbstract
     protected function _getLinkId()
     {
         if ($connect = @ldap_connect($this->uriConnect)) {
-            ldap_set_option(NULL, LDAP_OPT_DEBUG_LEVEL, 7);
+            //ldap_set_option(NULL, LDAP_OPT_DEBUG_LEVEL, 7);
             ldap_set_option($connect, LDAP_OPT_PROTOCOL_VERSION, $this->_params['protocolVersion']);
             ldap_set_option($connect, LDAP_OPT_REFERRALS, 0);
 
