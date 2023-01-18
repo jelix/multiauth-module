@@ -31,7 +31,6 @@ class multiauthModuleInstaller extends \Jelix\Installer\Module\Installer
 
             $this->updatePasswordField($authConfig['ldapdao']['dao'], $profile);
         }
-
     }
 
 

@@ -7,8 +7,8 @@ Installation
 This module is for Jelix 1.6.21 and higher. It replaces the ldapdao module,
 and it is compatible with jauth, jauthdb, jauthdb_admin and jcommunity modules.
 
-Install files with Jelix 1.7
-----------------------------
+Install files with Jelix 1.7 and 1.8
+------------------------------------
 You should use Composer to install the module. Run this commands in a shell:
                                                
 ```

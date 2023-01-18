@@ -6,9 +6,9 @@
         <description lang="en_US">It allows to check authentication against several
            login/password providers : ldap, database etc.</description>
         <license>MIT</license>
-        <copyright>2019-2022 Laurent Jouanneau</copyright>
+        <copyright>2019-2023 Laurent Jouanneau</copyright>
         <creator name="Laurent Jouanneau" email="laurent@jelix.org" />
-        <homepageURL>http://jelix.org</homepageURL>
+        <homepageURL>https://jelix.org</homepageURL>
     </info>
     <dependencies>
         <jelix minversion="1.6.21" maxversion="1.8.*"/>

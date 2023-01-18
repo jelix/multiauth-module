@@ -29,7 +29,7 @@ hostname=openldap
 port=389
 ; empty, "starttls" or "ldaps" (ldaps by default if port 636)
 ;tlsMode=starttls
-tlsMode=starttls
+tlsMode=
 adminUserDn="cn=admin,dc=tests,dc=jelix"
 adminPassword="passjelix"
 
