@@ -1,6 +1,11 @@
 Changes
 =======
 
+v1.2.0
+------
+
+Compatibility with PHP 8.1 and Jelix 1.8
+
 v1.1.4
 -----
 
