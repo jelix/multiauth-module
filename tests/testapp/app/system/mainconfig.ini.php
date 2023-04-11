@@ -37,7 +37,6 @@ jacl2db.enabled=on
 jacl2db_admin.enabled=on
 jpref.enabled=on
 jpref_admin.enabled=on
-multiauth.enabled=on
 jelix.installparam[wwwfiles]=vhost
 
 [coordplugins]

@@ -5,6 +5,7 @@
  * @license  http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public Licence, see LICENCE file
  */
 use \Jelix\Installer\Module\API\ConfigurationHelpers;
+use Jelix\Routing\UrlMapping\EntryPointUrlModifier;
 
 class multiauthModuleConfigurator extends \Jelix\Installer\Module\Configurator
 {
@@ -19,36 +20,39 @@ class multiauthModuleConfigurator extends \Jelix\Installer\Module\Configurator
         );
     }
 
+    public function declareUrls(EntryPointUrlModifier $registerOnEntryPoint)
+    {
+        // no controllers so no urls to declare
+    }
+
     public function configure(ConfigurationHelpers $helpers)
     {
         $cli = $helpers->cli();
-        $this->parameters['eps'] = $cli->askEntryPoints(
-            'Select entry points on which to setup the authentication plugin.',
-            $helpers->getEntryPointsByType('classic'),
-            true
-        );
 
-        $alreadyConfig = false;
-        foreach($this->parameters['eps'] as $epId) {
-            $ep = $helpers->getEntryPointsById($epId);
-            if ($ep->getConfigIni()->getValue('auth','coordplugins')) {
-                $alreadyConfig = true;
-                break;
-            }
+        if (isset($this->parameters['noconfigfile'])) {
+            $this->parameters['manualconfig'] = $this->parameters['noconfigfile'];
+            unset($this->parameters['noconfigfile']);
         }
-        if ($alreadyConfig) {
-            $this->parameters['manualconfig'] = $cli->askConfirmation('Do you will modify yourself the existing auth.coord.ini.php configuration file?', false);
+
+        if (!isset($this->parameters['eps'])
+            || !count($this->parameters['eps']))
+        {
+            $this->parameters['eps'] = $cli->askEntryPoints(
+                'Select entry points on which to setup the authentication plugin.',
+                $helpers->getEntryPointsByType('classic'),
+                true
+            );
         }
-        else {
-            $this->parameters['manualconfig'] = false;
-        }
+
+        $helpers->getConfigIni()->setValue('driver', 'multiauth', 'coordplugin_auth');
 
         foreach($this->getParameter('eps') as $epId) {
             $this->configureEntryPoint($epId, $helpers);
         }
     }
 
-    public function configureEntryPoint($epId, ConfigurationHelpers $helpers) {
+    public function configureEntryPoint($epId, ConfigurationHelpers $helpers)
+    {
         $entryPoint = $helpers->getEntryPointsById($epId);
 
         $configIni = $entryPoint->getConfigIni();
@@ -64,10 +68,10 @@ class multiauthModuleConfigurator extends \Jelix\Installer\Module\Configurator
             $helpers->copyFile('auth_multi.coord.ini.php', 'config:'.$pluginIni);
         }
         else {
+            /** @var \Jelix\IniFile\IniModifierInterface $conf */
             list($conf, $section) = $entryPoint->getCoordPluginConfig('auth');
 
-            if (!$this->getParameter('manualconfig')) {
-                $conf->setValue('driver', 'multiauth');
+            if (!$this->getParameter('manualconfig') && !$conf->isSection('multiauth')) {
                 $conf->setValues(array(
                     'dao' => 'jauthdb~jelixuser',
                     'profile' => 'jauth',

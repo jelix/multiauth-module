@@ -8,6 +8,7 @@ To launch containers the first time:
 ./run-docker build
 ./run-docker
 ./appctl ldapreset
+./appctl install-module-local
 ```
 
 You can execute some commands into the php container, by using this command:

@@ -22,6 +22,14 @@ case $COMMAND in
         docker exec -t -i ${CONTAINER_PREFIX}_php appctl.sh reset;;
     install)
         docker exec -t -i ${CONTAINER_PREFIX}_php appctl.sh install;;
+    install-module-dev)
+        docker exec -it --user userphp ${CONTAINER_PREFIX}_php php /jelixapp/tests/testapp/dev.php module:configure multiauth
+        docker exec -it --user userphp ${CONTAINER_PREFIX}_php php /jelixapp/tests/testapp/install/installer.php
+        ;;
+    install-module-local)
+        docker exec -it --user userphp ${CONTAINER_PREFIX}_php php /jelixapp/tests/testapp/install/configurator.php multiauth
+        docker exec -it --user userphp ${CONTAINER_PREFIX}_php php /jelixapp/tests/testapp/install/installer.php
+        ;;
     rights)
         docker exec -t -i ${CONTAINER_PREFIX}_php appctl.sh rights;;
     composer-install)

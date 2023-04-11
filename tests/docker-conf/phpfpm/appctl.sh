@@ -86,7 +86,8 @@ function resetApp() {
 }
 
 function launchInstaller() {
-    su $APP_USER -c "php $APPDIR/install/installer.php --verbose"
+    su $APP_USER -c "php $APPDIR/install/configurator.php"
+    su $APP_USER -c "php $APPDIR/install/installer.php"
 }
 
 function setRights() {

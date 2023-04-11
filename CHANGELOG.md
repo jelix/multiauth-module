@@ -1,6 +1,11 @@
 Changes
 =======
 
+v1.2.1
+------
+
+Fix installation
+
 v1.2.0
 ------
 
