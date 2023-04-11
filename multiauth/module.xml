@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module xmlns="http://jelix.org/ns/module/1.0">
     <info id="multiauth@modules.jelix.org" name="multiauth" createdate="2019-01-25">
-        <version date="2023-01-18">1.2.0</version>
+        <version date="2023-04-11">1.2.1</version>
         <label lang="en_US">plugin for jAuth supporting several authentication providers</label>
         <description lang="en_US">It allows to check authentication against several
            login/password providers : ldap, database etc.</description>
