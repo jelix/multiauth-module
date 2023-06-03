@@ -7,7 +7,15 @@ plugin for multiauth: they have almost the same configuration parameters.
 General configuration properties
 ---------------------------------
 
-First you should create a section into `auth.coord.ini.php`. Its name should
+First you should setup the module into the authentication system, by modifying
+the `auth.coord.ini.php` file.
+
+If you have installed multiauth into [Lizmap Web Client](https://www.lizmap.com/),
+you don't have to create or modify any `auth.coord.ini.php` file. The multiauth
+module is pre-configured, with an ldap profile named `lizmapldap`, you have to fill 
+with correct values for the connection. Go the next section. 
+
+In other applications, you should create a section into `auth.coord.ini.php`. Its name should
 be set into the `providers` parameter of multiauth.
 
 In this section, only one parameter is needed: `ldapprofile`. It
@@ -32,8 +40,9 @@ Connection configuration
 You should create an ldap profile, with the name indicated into the `ldapprofile`
 parameter. The ldap profile should be into the `var/config/profiles.ini.php` file.
 
-For example, if the profile is named `myldap` (like in the following example), 
-so you should set `ldapprofile=myldap` into `authldap.coord.ini.php`.
+If you have installed multiauth into Lizmap, the ldap profile is named `lizmapldap`,
+otherwise you should use a name. For example, if the profile is named `myldap` 
+(like in the following example), then you should set `ldapprofile=myldap` into `authldap.coord.ini.php`.
 
 Example of a profile for the ldap connection:
 
