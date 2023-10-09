@@ -116,17 +116,23 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
         }
     }
 
+    /**
+     * @return jDaoFactoryBase
+     */
+    public function getDao()
+    {
+        return jDao::get($this->_params['dao'], $this->_params['profile']);
+    }
+
     public function saveNewUser($user)
     {
-        $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
-        $dao->insert($user);
+        $this->getDao()->insert($user);
         return true;
     }
 
     public function removeUser($login)
     {
-        $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
-        $dao->deleteByLogin($login);
+        $this->getDao()->deleteByLogin($login);
         return true;
     }
 
@@ -139,15 +145,13 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
         if ($user->login == '') {
             throw new jException('multiauth~ldap.error.user.login.unset');
         }
-        $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
-        $dao->update($user);
+        $this->getDao()->update($user);
         return true;
     }
 
     public function getUser($login)
     {
-        $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
-        return $dao->getByLogin($login);
+        return $this->getDao()->getByLogin($login);
     }
 
     public function createUserObject($login, $password)
@@ -164,7 +168,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
 
     public function getUserList($pattern)
     {
-        $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
+        $dao = $this->getDao();
         if ($pattern == '%' || $pattern == '') {
             return $dao->findAll();
         } else {
@@ -174,7 +178,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
 
     public function canChangePassword($login)
     {
-        $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
+        $dao = $this->getDao();
         $user = $dao->getByLogin($login);
         if (preg_match("/^!!multiauth:(.+)!!$/", $user->password, $m)) {
             if (isset($this->providers[$m[1]])) {
@@ -202,7 +206,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
 
     public function changePassword($login, $newpassword)
     {
-        $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
+        $dao = $this->getDao();
         $user = $dao->getByLogin($login);
 
         if (preg_match("/^!!multiauth:(.+)!!$/", $user->password, $m)) {
@@ -234,7 +238,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
 
     public function verifyPassword($login, $password)
     {
-        $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
+        $dao = $this->getDao();
         $user = $dao->getByLogin($login);
         $createdUser = false;
         if (!$user) {
@@ -385,7 +389,6 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
         }
 
         $password = '!!multiauth:'.$providerKey.'!!';
-        $dao = jDao::get($this->_params['dao'], $this->_params['profile']);
-        $dao->updatePassword($login, $password);
+        $this->getDao()->updatePassword($login, $password);
     }
 }
