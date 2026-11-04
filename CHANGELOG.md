@@ -1,6 +1,38 @@
 Changes
 =======
 
+next
+-----
+
+Compatibility PHP 8.2 minimum.
+
+**Improve the ldap connector**
+
+It has been rewritten, is more secured and brings some new features:
+
+- possibility to use a client TLS certificate. Warning: it can be used only on a PHP server serving
+  a single application, since the certificate is persistent in a process (this is a limitation of the openldap library)
+- possibility to enable the change of the password
+
+
+**Removed configuration parameters for ldap**
+
+- `bindUserDn` has been removed. You must fill  `searchGroupBaseDN` and you may
+  have to fill the new parameter `bindAttribute`, if needed.
+
+**New configuration parameters for ldap**
+
+- `bindAttribute`: indicate the ldap attribute containing the DN of the user. (by default: `dn`)
+- `networkTimeout`: timeout in seconds to connect to the server (10 by default).
+- `timeLimit`: time limit in seconds for search operations (10 by default).
+- `clientTLSCACertificateFile`: path to a custom or self-signed CA certificate
+- `clientTLSCertificateFile`: path to the client Certificate
+- `clientTLSKeyFile`: path to the private key for the client Certificate
+- `featureGroupLoad` to enable/disable the synchronization of rights
+- `featureChangePassword` to enable/disable the possibility for the user to change his password
+- `passwordLdapHashAlgo`: the hash algorithm to use to send the new password to Ldap.
+
+
 v1.2.2
 ------
 

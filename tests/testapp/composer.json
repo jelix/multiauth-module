@@ -3,8 +3,9 @@
     "type": "project",
     "license": "LGPL",
     "require": {
-      "php": ">=7.4",
-      "jelix/jelix": "dev-jelix-1.8.x"
+      "php": ">=8.2",
+      "jelix/jelix": "dev-jelix-1.8.x",
+      "jelix/ldap-client": "1.0.0-beta.3"
     },
     "minimum-stability": "stable",
     "config": {
