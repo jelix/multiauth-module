@@ -4,7 +4,7 @@ set -e
 
 export FPM_USER_ID=${FPM_USER_ID:-$(id -u)}
 export FPM_GROUP_ID=${FPM_GROUP_ID:-$(id -g)}
-export PHP_VERSION=${PHP_VERSION:-8.1}
+export PHP_VERSION=${PHP_VERSION:-8.2}
 
 CMD=$1
 

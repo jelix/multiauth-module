@@ -56,10 +56,6 @@ EOF
         dc_string="$dc_string,dc=$dc_part"
     done
 
-    base_string="BASE ${dc_string:1}"
-
-    echo "$base_string" > /etc/ldap/ldap.conf
-
     if [[ -n "$SLAPD_CONFIG_PASSWORD" ]]; then
         password_hash=`slappasswd -s "${SLAPD_CONFIG_PASSWORD}"`
 
@@ -74,26 +70,23 @@ EOF
 
     if [ -d /customcerts ]; then
       if [[ -n "$SLAPD_TLS_KEY_FILENAME" ]]; then
-          cp -a /customcerts/$SLAPD_TLS_KEY_FILENAME /etc/ssl/private/ldap.key
-          cp -a /customcerts/$SLAPD_TLS_CRT_FILENAME /etc/ssl/certs/ldap.crt
-          cp -a /customcerts/$SLAPD_TLS_CA_CRT_FILENAME /etc/ssl/certs/ldap_CA.crt
-          chown root:ssl-cert /etc/ssl/private/ldap.key
-          chown root:ssl-cert /etc/ssl/certs/ldap_CA.crt
-          chown root:ssl-cert /etc/ssl/certs/ldap.crt
-          chmod 0444 /etc/ssl/certs/ldap_CA.crt
-          chmod 0444 /etc/ssl/certs/ldap.crt
-          chmod 0440 /etc/ssl/private/ldap.key
-
-          #if [ ! -f /etc/ssl/ldap_dhparam.pem ]; then
-          #  openssl dhparam  -out /etc/ssl/ldap_dhparam.pem 2048
-          #fi
-
-          echo "TLS_CACERT /etc/ssl/certs/ldap_CA.crt" >> /etc/ldap/ldap.conf
+          cp -a /customcerts/$SLAPD_TLS_KEY_FILENAME /etc/ldap/sasl2/privkey.key
+          cp -a /customcerts/$SLAPD_TLS_CRT_FILENAME /etc/ldap/sasl2/cert.pem
+          cp -a /customcerts/$SLAPD_TLS_CA_CRT_FILENAME /etc/ldap/sasl2/ca.pem
+          chown root:openldap /etc/ldap/sasl2/privkey.key
+          chown root:openldap /etc/ldap/sasl2/cert.pem
+          chown root:openldap /etc/ldap/sasl2/ca.pem
+          chmod 0644 /etc/ldap/sasl2/cert.pem
+          chmod 0644 /etc/ldap/sasl2/ca.pem
+          chmod 0640 /etc/ldap/sasl2/privkey.key
 
           slapcat -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif
-          sed -i "s/\(cn: config\)/\1\nolcTLSCACertificateFile: \/etc\/ssl\/certs\/ldap_CA.crt\nolcTLSCertificateFile: \/etc\/ssl\/certs\/ldap.crt\nolcTLSCertificateKeyFile: \/etc\/ssl\/private\/ldap.key\nolcTLSVerifyClient: never/g" /tmp/config.ldif
-          #sed -i "s/\(cn: config\)/\1\nolcTLSCACertificateFile: \/etc\/ssl\/certs\/ldap_CA.crt\nolcTLSCertificateFile: \/etc\/ssl\/certs\/ldap.crt\nolcTLSCertificateKeyFile: \/etc\/ssl\/private\/ldap.key\nolcTLSDHParamFile: \/etc\/ssl\/ldap_dhparam.pem\nolcTLSVerifyClient: never/g" /tmp/config.ldif
 
+          if [[ -n "$SLAPD_TLS_VERIFY_CLIENT" ]]; then
+              sed -i "s/\(cn: config\)/\1\nolcTLSCACertificateFile: \/etc\/ldap\/sasl2\/ca.pem\nolcTLSCertificateFile: \/etc\/ldap\/sasl2\/cert.pem\nolcTLSCertificateKeyFile: \/etc\/ldap\/sasl2\/privkey.key\nolcTLSVerifyClient: ${SLAPD_TLS_VERIFY_CLIENT}/g" /tmp/config.ldif
+          else
+              sed -i "s/\(cn: config\)/\1\nolcTLSCACertificateFile: \/etc\/ldap\/sasl2\/ca.pem\nolcTLSCertificateFile: \/etc\/ldap\/sasl2\/cert.pem\nolcTLSCertificateKeyFile: \/etc\/ldap\/sasl2\/privkey.key\nolcTLSVerifyClient: never/g" /tmp/config.ldif
+          fi
           rm -rf /etc/ldap/slapd.d/*
           slapadd -n0 -F /etc/ldap/slapd.d -l /tmp/config.ldif
           rm /tmp/config.ldif
@@ -139,6 +132,10 @@ fi
 #        done
 #    fi
 #fi
+
+if [ ! -d /var/run/slapd ]; then
+  mkdir /var/run/slapd
+fi
 
 chown -R openldap:openldap /etc/ldap/slapd.d/ /var/lib/ldap/ /var/run/slapd/
 
