@@ -6,6 +6,8 @@ next
 
 Compatibility PHP 8.2 minimum.
 
+Drop support of Jelix 1.7 and Lizmap 3.5 or lower.
+
 **Improve the ldap connector**
 
 It has been rewritten, is more secured and brings some new features:

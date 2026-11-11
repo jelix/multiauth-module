@@ -11,7 +11,7 @@
         <homepageURL>https://jelix.org</homepageURL>
     </info>
     <dependencies>
-        <jelix minversion="1.6.21" maxversion="1.8.*"/>
+        <jelix minversion="1.8.28" maxversion="1.8.*"/>
         <module name="jacl2db" />
         <choice>
             <modules>

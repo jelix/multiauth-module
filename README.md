@@ -4,13 +4,14 @@ against several login/password authentication providers.
 Installation
 ============
 
-This module is for Jelix 1.6.21 and higher. It replaces the ldapdao module,
+This module is for Jelix 1.8.28 and higher. It replaces the ldapdao module,
 and it is compatible with jauth, jauthdb, jauthdb_admin and jcommunity modules.
 
-Install files with Jelix 1.7 and 1.8
-------------------------------------
+Install files with Jelix 1.8+
+-----------------------------
+
 You should use Composer to install the module. Run this commands in a shell:
-                                               
+
 ```
 composer require "jelix/multiauth-module"
 ```
@@ -18,43 +19,13 @@ composer require "jelix/multiauth-module"
 Launch the configurator for your application to enable the module
 
 ```bash
+# for developers of the application
 php yourapp/dev.php module:configure multiauth
+# or for users adding multiauth on a application they just installed:
+php yourapp/configure.php multiauth
 
 php yourapp/install/installer.php
 
-```
-
-Install files with Jelix 1.6.21
--------------------------------
-
-Copy the `multiauth` directory into the modules/ directory of your application.
-
-Next you must say to Jelix that you want to use the module. Declare
-it into the mainconfig.ini.php file (into yourapp/var/config/).
-
-In the `[modules]` section, add:
-
-```ini
-multiauth.access=1
-```
-
-Following modules are required: jacl2, jauth, jauthdb. In this same section 
-verify that they are activated:
-
-```ini
-jacl2.access=1
-jauth.access=2
-jauthdb.access=1
-```
-
-If you are using the jCommunity module, you should not activate jauthdb, so keep
-`jauthdb.access=0`.
-
-
-In the command line, launch:
-
-```
-php yourapp/install/installer.php
 ```
 
 Configuration
