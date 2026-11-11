@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module xmlns="http://jelix.org/ns/module/1.0">
     <info id="multiauth@modules.jelix.org" name="multiauth" createdate="2019-01-25">
-        <version date="2023-10-09">1.2.2</version>
+        <version date="2026-11-11">1.3.0-beta.1</version>
         <label lang="en_US">plugin for jAuth supporting several authentication providers</label>
         <description lang="en_US">It allows to check authentication against several
            login/password providers : ldap, database etc.</description>
         <license>MIT</license>
-        <copyright>2019-2023 Laurent Jouanneau</copyright>
+        <copyright>2019-2026 Laurent Jouanneau</copyright>
         <creator name="Laurent Jouanneau" email="laurent@jelix.org" />
         <homepageURL>https://jelix.org</homepageURL>
     </info>

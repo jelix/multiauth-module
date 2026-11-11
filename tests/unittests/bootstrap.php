@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__.'/../testapp/application.init.php');
+require_once(__DIR__.'/../../multiauth/lib/ProviderConfiguration.php');
 require_once(__DIR__.'/../../multiauth/lib/ProviderPluginInterface.php');
 require_once(__DIR__.'/../../multiauth/lib/ProviderAbstract.php');
 require_once(__DIR__.'/../../multiauth/lib/LdapLogger.php');

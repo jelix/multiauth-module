@@ -3,11 +3,12 @@
  * @package    jelix
  * @subpackage auth_driver
  * @author     Laurent Jouanneau
- * @copyright  2019 Laurent Jouanneau
+ * @copyright  2019-2026 Laurent Jouanneau
  * @license   MIT
  */
 
-use \Jelix\MultiAuth\ProviderPluginInterface;
+use Jelix\MultiAuth\ProvidersConfigurations;
+use Jelix\MultiAuth\ProviderPluginInterface;
 
 /**
  * authentication driver allowing to authenticate against multiple authentication
@@ -32,7 +33,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
      */
     protected $dbAccountProvider = null;
 
-    protected $automaticAccountCreation = false;
+    protected ProvidersConfigurations $configuration;
 
     public function __construct($params)
     {
@@ -41,79 +42,10 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
         }
 
         parent::__construct($params);
-        if (!isset($this->_params['profile'])) {
-            $this->_params['profile'] = '';
-        }
-        if (!isset($this->_params['dao'])) {
-            throw new Exception("Dao selector is missing into the multiauth configuration");
-        }
-        if (!isset($this->_params['providers'])) {
-            /** @var ProviderPluginInterface $plugin */
-            $plugin = jApp::loadPlugin('dbaccounts', 'multiauth', '.multiauth.php', 'dbaccountsProvider', array());
-            if (is_null($plugin)) {
-                throw new Exception('Plugin dbaccounts for multiAuth not found');
-            }
-            $plugin->setRegisterKey('dbaccounts');
-            $this->providers['dbaccounts'] = $plugin;
-            $this->dbAccountProvider = $plugin;
-        } else {
-            $config = jAuth::loadConfig();
-            foreach ($this->_params['providers'] as $providerInfo) {
-                $providerConfig = array(
-                    'password_hash_method' => $this->passwordHashMethod,
-                    'password_hash_options' => $this->passwordHashOptions,
-                    'accountsDao' => $this->_params['dao'],
-                    'accountsDaoProfile'=> $this->_params['profile'],
-                );
-                if (isset($this->_params['password_crypt_function'])) {
-                    $providerConfig['password_crypt_function'] = $this->_params['password_crypt_function'];
-                }
-                if (strpos($providerInfo, ':') !== false) {
-                    list($provider, $providerSection) = explode(':', $providerInfo);
 
-                    $sectionFound = false;
-                    if (isset($config[$providerSection]) && is_array($config[$providerSection])) {
-                        $providerConfig = array_merge($providerConfig, $config[$providerSection]);
-                        $sectionFound = true;
-                    }
-
-                    if (property_exists(jApp::config(), $providerSection)) {
-                        $providerConfig = array_merge($providerConfig, jApp::config()->$providerSection);
-                        $sectionFound = true;
-                    }
-
-                    if (!$sectionFound) {
-                        throw new Exception("Section '$providerSection' to configure the provider '$provider' for multiauth, is missing");
-                    }
-                } else {
-                    $provider = $providerInfo;
-                }
-
-                /** @var ProviderPluginInterface $plugin */
-                $plugin = jApp::loadPlugin(
-                    $provider,
-                    'multiauth',
-                    '.multiauth.php',
-                    $provider.'Provider',
-                    $providerConfig
-                );
-                if (is_null($plugin)) {
-                    throw new Exception('Plugin '.$provider.' for multiAuth not found');
-                }
-                $plugin->setRegisterKey($providerInfo);
-                $this->providers[$providerInfo] = $plugin;
-                if ($plugin->getFeature() & ProviderPluginInterface::FEATURE_USE_MULTIAUTH_TABLE) {
-                    if ($this->dbAccountProvider) {
-                        throw new Exception("Multiauth plugin does not accept multiple providers based on the account table");
-                    }
-                    $this->dbAccountProvider = $plugin;
-                }
-            }
-        }
-
-        if (isset($this->_params['automaticAccountCreation'])) {
-            $this->automaticAccountCreation = $this->_params['automaticAccountCreation'];
-        }
+        $this->configuration = new ProvidersConfigurations($params);
+        $this->providers = $this->configuration->loadProviders();
+        $this->dbAccountProvider = $this->configuration->getDBAccountProvider();
     }
 
     /**
@@ -121,7 +53,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
      */
     public function getDao()
     {
-        return jDao::get($this->_params['dao'], $this->_params['profile']);
+        return jDao::get($this->configuration->dao, $this->configuration->profile);
     }
 
     public function saveNewUser($user)
@@ -156,7 +88,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
 
     public function createUserObject($login, $password)
     {
-        $user = jDao::createRecord($this->_params['dao'], $this->_params['profile']);
+        $user = jDao::createRecord($this->configuration->dao, $this->configuration->profile);
         $user->login = $login;
         if (strpos($password, '!!multiauth:') !== false) {
             $user->password = $password;
@@ -312,7 +244,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
                     if (isset($pConf['automaticAccountCreation'])) {
                         $automaticAccountCreation = $pConf['automaticAccountCreation'];
                     } else {
-                        $automaticAccountCreation = $this->automaticAccountCreation;
+                        $automaticAccountCreation = $this->configuration->isAutomaticAccountCreation();
                     }
                     if ($automaticAccountCreation && ! $useAccountTableForPassword) {
                         // WARNING: we should not create the user if the provider

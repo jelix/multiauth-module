@@ -32,6 +32,11 @@ It has been rewritten, is more secured and brings some new features:
 - `featureChangePassword` to enable/disable the possibility for the user to change his password
 - `passwordLdapHashAlgo`: the hash algorithm to use to send the new password to Ldap.
 
+How to migrate:
+
+The configuration is automatically migrated. However, if the authentication does
+not work, check if `searchUserBaseDN` and `bindAttribute` are set correctly.
+
 
 v1.2.2
 ------

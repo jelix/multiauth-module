@@ -101,7 +101,7 @@ password_hash_options=
 dao="jauthdb~jelixuser"
 
 ; profile to use for jDb 
-profile="jauth"
+profile=jauth
 
 ; name of the php function used to hash password in the database
 ; It is deprecated but still used to convert password hash
@@ -130,33 +130,33 @@ uploadsDirectory=
 [multiauth]
 
 ; name of the dao to get user data
-dao = "jauthdb~jelixuser"
+dao="jauthdb~jelixuser"
 
 ; profile to use for jDb
-profile = "jauth"
+profile=jauth
 
 ; list of authentication providers
-providers[]=ldap:multiauth_ldap
+providers[]="ldap:multiauth_ldap"
 providers[]=dbaccounts
 
 ; name of the form for the jauthdb_admin module
-form = "jauthdb_admin~jelixuser"
+form="jauthdb_admin~jelixuser"
 
 ; path of the directory where to store files uploaded by the form (jauthdb_admin module)
 ; should be related to the var directory of the application
-uploadsDirectory= ""
+uploadsDirectory=
 
 
 ; when a user login successfully, an account will be created automatically
-automaticAccountCreation = on
+automaticAccountCreation=on
 
-compatiblewithdb = on
+compatiblewithdb=on
 
 
 ; you should set it to allow password storage migration, if you have an old
 ; users table.
 ; @deprecated
-password_crypt_function = sha1
+password_crypt_function=sha1
 
 
 
@@ -164,7 +164,7 @@ password_crypt_function = sha1
 
 [multiauth_ldap]
 ; profile to use for ldap
-ldapprofile = "multiauthldap"
+ldapprofile=multiauthldap
 
 ; all of this following parameters should be set into the profiles.ini.php file.
 ; Here is their default values.
@@ -178,14 +178,6 @@ searchUserBaseDN="ou=people,dc=tests,dc=jelix"
 searchUserFilter[]="(&(objectClass=inetOrgPerson)(uid=%%LOGIN%%))"
 searchUserFilter[]="(&(objectClass=simpleSecurityObject)(cn=%%LOGIN%%))"
 
-; the dn to bind the user to login.
-; The value can contain a `?` that will be replaced by the corresponding
-; attribute value readed from the result of searchUserFilter.
-; Or it can contain  `%%LOGIN%%`, replaced by the given login
-; Or it can contain only an attribute name, starting with a `$`: the
-; attribute should then contain a full DN.
-bindUserDN[]="uid=%?%,ou=people,dc=tests,dc=jelix"
-bindUserDN[]="cn=%?%,dc=tests,dc=jelix"
 
 ; attributes to retrieve for a user
 ; for dao mapping: "ldap attribute:dao attribute"
@@ -207,11 +199,11 @@ searchGroupFilter="(&(objectClass=groupOfNames)(cn=*)(member=%%USERDN%%))"
 
 ; if set to on, users are set in default groups during groups synchronization
 ; default is on.
-searchGroupKeepUserInDefaultGroups = on
+searchGroupKeepUserInDefaultGroups=on
 
 ; the property in the ldap entry corresponding to a group, that indicate the
 ; the group name
-searchGroupProperty="cn"
+searchGroupProperty=cn
 
 ; base dn to search groups. Used to search a group using the filter from searchGroupFilter
 searchGroupBaseDN="ou=groups,dc=tests,dc=jelix"

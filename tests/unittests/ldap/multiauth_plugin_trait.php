@@ -2,7 +2,7 @@
 /**
  * @package     multiauth
  * @author      laurent Jouanneau
- * @copyright   2017-2022 laurent Jouanneau
+ * @copyright   2017-2026 laurent Jouanneau
  * @link        http://www.jelix.org
  * @licence     GNU Lesser General Public Licence see LICENCE file or http://www.gnu.org/licenses/lgpl.html
  */
@@ -38,7 +38,7 @@ trait multiauth_plugin_trait {
         $conf = parse_ini_file(__DIR__.'/authldap.coord.ini',true);
         $conf['multiauth_ldap']['ldapprofile'] = $this->ldapProfileName;
 
-        jAuth::loadConfig($conf);
+        $conf = jAuth::loadConfig($conf);
 
         require_once( JELIX_LIB_PATH.'plugins/coord/auth/auth.coord.php');
         jApp::coord()->plugins['auth'] = new AuthCoordPlugin($conf);
