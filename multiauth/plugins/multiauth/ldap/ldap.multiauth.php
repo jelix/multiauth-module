@@ -3,12 +3,13 @@
  * @package    jelix
  * @subpackage auth_driver
  * @author     Laurent Jouanneau
- * @copyright  2019 Laurent Jouanneau
+ * @copyright  2019-2026 Laurent Jouanneau
  * @license   MIT
  */
 
 use Jelix\Ldap\LdapClient;
 use Jelix\MultiAuth\LdapLogger;
+use Jelix\MultiAuth\LdapProviderConfig;
 use \Jelix\MultiAuth\ProviderAbstract;
 
 /**
@@ -34,29 +35,7 @@ class ldapProvider extends ProviderAbstract
     {
         parent::__construct($params);
 
-        if (!isset($this->_params['ldapprofile']) || $this->_params['ldapprofile'] == '') {
-            throw new jException('multiauth~ldap.error.ldap.profile.missing');
-        }
-
-        $profile = jProfiles::get('ldap', $this->_params['ldapprofile']);
-        $this->_params = array_merge($this->_params, $profile);
-
-        // default parameters
-        $_default_params = array(
-            'searchGroupKeepUserInDefaultGroups' => true,
-        );
-
-        // iterate each default parameter and apply it to actual params if missing in $params.
-        foreach ($_default_params as $name => $value) {
-            if (!isset($this->_params[$name]) || $this->_params[$name] == '') {
-                $this->_params[$name] = $value;
-            }
-        }
-
-        $this->_params['featureCreateUser'] = false;
-        $this->_params['featureUpdateUser'] = false;
-        $this->_params['featureDeleteUser'] = false;
-
+        $this->_params = LdapProviderConfig::loadFullConfiguration($this->_params);
 
         $logger = new LdapLogger();
 

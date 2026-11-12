@@ -9,6 +9,7 @@ use Jelix\IniFile\IniModifier;
 use Jelix\IniFile\IniModifierInterface;
 use Jelix\Installer\Module\API\InstallHelpers;
 use Jelix\Ldap\LdapMigration;
+use Jelix\MultiAuth\LdapProviderConfig;
 use Jelix\MultiAuth\ProvidersConfigurations;
 
 class multiauthModuleUpgrader_newldaplib extends \Jelix\Installer\Module\Installer
@@ -35,11 +36,10 @@ class multiauthModuleUpgrader_newldaplib extends \Jelix\Installer\Module\Install
                 if (!isset($providerConfig['ldapprofile']) || in_array($providerConfig['ldapprofile'], $migratedLdapProfiles)) {
                     continue;
                 }
+
+                $providerConfig = LdapProviderConfig::loadFullConfiguration($providerConfig);
+
                 $migratedLdapProfiles[] = $providerConfig['ldapprofile'];
-                $profile = jProfiles::get('ldap', $providerConfig['ldapprofile']);
-                if ($profile) {
-                    $providerConfig = array_merge($providerConfig, $profile);
-                }
 
                 $providerConfig = LdapMigration::migrateMultiauthConfiguration($providerConfig);
                 $this->saveProfile($profilesIni, 'ldap:'.$providerConfig['ldapprofile'], $providerConfig);
