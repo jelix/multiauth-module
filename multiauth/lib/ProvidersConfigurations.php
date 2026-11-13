@@ -38,6 +38,19 @@ class ProvidersConfigurations
     }
 
 
+    public static function loadFromApplication() : ProvidersConfigurations
+    {
+        $authConfig = jAuth::loadConfig();
+        if (isset($authConfig['multiauth'])) {
+            $configMultiauth = $authConfig['multiauth'];
+            if (property_exists(jApp::config(), 'multiauth') && is_array(jApp::config()->multiauth)) {
+                $configMultiauth = array_merge($configMultiauth, jApp::config()->multiauth);
+            }
+            return new self($configMultiauth);
+        }
+        throw new Exception('multiauth configuration not found');
+    }
+
     protected $authConfig = array();
 
     protected $multiauthConfig = array();
@@ -82,6 +95,7 @@ class ProvidersConfigurations
                     'password_hash_options' => $multiauthConfig['password_hash_options'],
                     'accountsDao' => $multiauthConfig['dao'],
                     'accountsDaoProfile'=> $multiauthConfig['profile'],
+                    'accountsFormSelector' => isset($multiauthConfig['form']) ? $multiauthConfig['form'] : '',
                 );
                 if (isset($multiauthConfig['password_crypt_function'])) {
                     $providerConfig['password_crypt_function'] = $multiauthConfig['password_crypt_function'];

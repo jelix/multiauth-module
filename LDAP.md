@@ -131,7 +131,7 @@ first time he authenticates himself, the plugin needs some data about the user.
 You should indicate to it which ldap attributes it can retrieve, and which
 database fields that will receive the ldap attributes values.
 
-You indicate such informations into the `searchAttributes` property. It is a 
+You indicate such information into the `searchAttributes` property. It is a 
 pair of names, `<ldap attribute>:<table field>`, separated by a comma.
 
 In this example, `searchAttributes="uid:login,givenName,sn:lastname,mail:email,dn:"`:

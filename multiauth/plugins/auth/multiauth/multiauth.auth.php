@@ -35,6 +35,10 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
 
     protected ProvidersConfigurations $configuration;
 
+    /**
+     * @param array $params
+     * @throws jException
+     */
     public function __construct($params)
     {
         if (property_exists(jApp::config(), 'multiauth') && is_array(jApp::config()->multiauth)) {

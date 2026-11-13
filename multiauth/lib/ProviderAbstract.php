@@ -20,6 +20,9 @@ abstract class ProviderAbstract implements \Jelix\MultiAuth\ProviderPluginInterf
     protected $accountsDao;
     protected $accountsDaoProfile;
 
+    /**
+     * @param array $params
+     */
     public function __construct($params)
     {
         $this->_params = $params;
