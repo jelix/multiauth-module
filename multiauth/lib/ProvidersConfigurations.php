@@ -96,6 +96,7 @@ class ProvidersConfigurations
                     'accountsDao' => $multiauthConfig['dao'],
                     'accountsDaoProfile'=> $multiauthConfig['profile'],
                     'accountsFormSelector' => isset($multiauthConfig['form']) ? $multiauthConfig['form'] : '',
+                    'enabled' => true,
                 );
                 if (isset($multiauthConfig['password_crypt_function'])) {
                     $providerConfig['password_crypt_function'] = $multiauthConfig['password_crypt_function'];
@@ -151,11 +152,15 @@ class ProvidersConfigurations
      * @return ProviderPluginInterface[]
      * @throws Exception
      */
-    public function loadProviders()
+    public function loadEnabledProviders()
     {
         $providers = array();
         $dbAccountProvider = null;
         foreach ($this->providersConfig as $providerConf) {
+
+            if (!$providerConf->isEnabled()) {
+                continue;
+            }
 
             /** @var ProviderPluginInterface $plugin */
             $plugin = jApp::loadPlugin(

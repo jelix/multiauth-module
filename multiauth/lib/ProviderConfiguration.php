@@ -23,4 +23,9 @@ class ProviderConfiguration
         $this->configuration = $configuration;
         $this->providerConfigName = $providerConfigName;
     }
+
+    public function isEnabled()
+    {
+        return $this->configuration['enabled'] ?? true;
+    }
 }

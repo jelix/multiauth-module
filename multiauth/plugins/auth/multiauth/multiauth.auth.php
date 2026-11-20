@@ -48,7 +48,7 @@ class multiauthAuthDriver extends jAuthDriverBase implements jIAuthDriver2
         parent::__construct($params);
 
         $this->configuration = new ProvidersConfigurations($params);
-        $this->providers = $this->configuration->loadProviders();
+        $this->providers = $this->configuration->loadEnabledProviders();
         $this->dbAccountProvider = $this->configuration->getDBAccountProvider();
     }
 
