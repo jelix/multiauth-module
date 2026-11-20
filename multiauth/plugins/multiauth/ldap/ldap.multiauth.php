@@ -47,12 +47,7 @@ class ldapProvider extends ProviderAbstract
      */
     public function getFeature()
     {
-        $feature = self::FEATURE_SUPPORT_PASSWORD;
-        if ($this->ldapClient->hasFeature($this->ldapClient::FEATURE_CHANGE_PASSWORD)) {
-            $feature |= self::FEATURE_CHANGE_PASSWORD;
-        }
-
-        return $feature;
+        return self::FEATURE_SUPPORT_PASSWORD;
     }
 
     /**
@@ -60,9 +55,6 @@ class ldapProvider extends ProviderAbstract
      */
     public function changePassword($login, $newpassword)
     {
-        if ($this->ldapClient->hasFeature($this->ldapClient::FEATURE_CHANGE_PASSWORD)) {
-            return $this->ldapClient->changePassword($login, $newpassword);
-        }
         throw new jException('multiauth~ldap.error.unsupported.password.change');
     }
 
