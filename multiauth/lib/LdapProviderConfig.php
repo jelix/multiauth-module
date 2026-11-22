@@ -12,13 +12,18 @@ use jProfiles;
 class LdapProviderConfig
 {
 
-    public static function loadFullConfiguration($providerConfig)
+    public static function loadFullConfiguration(array $providerConfig)
     {
         if (!isset($providerConfig['ldapprofile']) || $providerConfig['ldapprofile'] == '') {
-            throw new jException('multiauth~ldap.error.ldap.profile.missing');
+            throw new ProviderConfigurationException(\jLocale::get('multiauth~ldap.error.ldap.profile.missing'), 8);
+        }
+        try {
+            $profile = jProfiles::get('ldap', $providerConfig['ldapprofile']);
+        }
+        catch(\Exception $e) {
+            throw new ProviderConfigurationException('Ldap profile is missing', 9);
         }
 
-        $profile = jProfiles::get('ldap', $providerConfig['ldapprofile']);
         $providerConfig = array_merge($providerConfig, $profile);
 
         // default parameters

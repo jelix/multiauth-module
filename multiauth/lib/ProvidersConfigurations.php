@@ -18,11 +18,11 @@ class ProvidersConfigurations
     {
         $authConfigFile = $configIni->getValue('auth', 'coordplugins');
         if (!$authConfigFile || !is_string($authConfigFile) || strlen($authConfigFile) < 2) {
-            throw new Exception('auth.coord.ini.php not declared');
+            throw new ProviderConfigurationException('auth.coord.ini.php not declared', 1);
         }
         $authConfigFilePath = jApp::appSystemPath($authConfigFile);
         if (!file_exists($authConfigFilePath)) {
-            throw new Exception('auth.coord.ini.php not found');
+            throw new ProviderConfigurationException('auth.coord.ini.php not found', 2);
         }
 
         $confIni = parse_ini_file($authConfigFilePath, true);
@@ -34,7 +34,7 @@ class ProvidersConfigurations
             }
             return new self($configMultiauth);
         }
-        throw new Exception('multiauth configuration not found');
+        throw new ProviderConfigurationException('multiauth configuration not found', 3);
     }
 
 
@@ -81,11 +81,11 @@ class ProvidersConfigurations
             $multiauthConfig['profile'] = '';
         }
         if (!isset($multiauthConfig['dao'])) {
-            throw new Exception("Dao selector is missing into the multiauth configuration");
+            throw new ProviderConfigurationException("Dao selector is missing into the multiauth configuration", 5);
         }
         
         if (!isset($multiauthConfig['providers'])) {
-            $this->providersConfig[] = new ProviderConfiguration('dbaccounts', 'dbaccounts', '', array());
+            $this->providersConfig[] = new ProviderConfiguration('dbaccounts', 'dbaccounts', array());
         }
         else {
             $config = jAuth::loadConfig();
@@ -171,18 +171,22 @@ class ProvidersConfigurations
                 $providerConf->configuration
             );
             if (is_null($plugin)) {
-                throw new Exception('Plugin '.$providerConf->providerName.' for multiAuth not found');
+                throw new ProviderConfigurationException(
+                    'Plugin '.$providerConf->providerName.' for multiAuth not found', 6,
+                    $providerConf->providerName,
+                    $providerConf->providerConfigName
+                );
             }
             $plugin->setRegisterKey($providerConf->providerKey);
             $providers[$providerConf->providerKey] = $plugin;
             if ($plugin->getFeature() & ProviderPluginInterface::FEATURE_USE_MULTIAUTH_TABLE) {
                 if ($dbAccountProvider) {
-                    throw new Exception("Multiauth plugin does not accept multiple providers based on the account table");
+                    throw new ProviderConfigurationException("Multiauth plugin does not accept multiple providers based on the account table", 7);
                 }
                 $dbAccountProvider = $plugin;
             }
             else {
-                \jLog::log($providerConf->providerKey. ' not db account provider');
+                \jLog::log($providerConf->providerKey. ' not db account provider', 'warning');
             }
         }
         return $providers;
@@ -199,6 +203,9 @@ class ProvidersConfigurations
         return $this->dbAccountProvider;
     }
 
+    /**
+     * @return ProviderConfiguration[]
+     */
     public function getProvidersConfig()
     {
         return $this->providersConfig;
