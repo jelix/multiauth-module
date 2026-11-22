@@ -38,9 +38,6 @@ class LdapProviderConfig
             }
         }
 
-        $providerConfig['featureCreateUser'] = false;
-        $providerConfig['featureUpdateUser'] = false;
-        $providerConfig['featureDeleteUser'] = false;
         return $providerConfig;
     }
 }

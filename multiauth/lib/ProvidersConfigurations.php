@@ -104,26 +104,24 @@ class ProvidersConfigurations
                 if (strpos($providerKey, ':') !== false) {
                     list($provider, $providerSection) = explode(':', $providerKey);
 
-                    $sectionFound = false;
+                    $providerSectionExists = false;
                     if (isset($config[$providerSection]) && is_array($config[$providerSection])) {
                         $providerConfig = array_merge($providerConfig, $config[$providerSection]);
-                        $sectionFound = true;
+                        $providerSectionExists = true;
                     }
 
                     if (property_exists(jApp::config(), $providerSection)) {
                         $providerConfig = array_merge($providerConfig, jApp::config()->$providerSection);
-                        $sectionFound = true;
+                        $providerSectionExists = true;
                     }
 
-                    if (!$sectionFound) {
-                        throw new Exception("Section '$providerSection' to configure the provider '$provider' for multiauth, is missing");
-                    }
                 } else {
                     $provider = $providerKey;
                     $providerSection = '';
+                    $providerSectionExists = false;
                 }
 
-                $this->providersConfig[] = new ProviderConfiguration($providerKey, $provider, $providerSection, $providerConfig);
+                $this->providersConfig[] = new ProviderConfiguration($providerKey, $provider, $providerConfig, $providerSection, $providerSectionExists);
             }
         }
 
