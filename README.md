@@ -31,14 +31,31 @@ php yourapp/install/installer.php
 Configuration
 =============
 
-using the `auth.coord.ini.php`
+The configurator of the module create automatically configuration parameters, 
+
+- configuration parameters for jAuth in the `app/system/*/auth.coord.ini.php` or `var/config/*/auth.coord.ini.php` (depending if the module multiauth is bundled with the application or not).
+ Below, this file is referenced as `auth.coord.ini.php`.
+- configuration parameters for MultiAuth in `app/system/mainconfig.ini.php` or `var/config/localconfig.ini.php` (depending if the module multiauth is bundled with the application or not).
+  Below, this file is referenced as 'application configuration'.
+- configuration parameters for the ldap connector in `var/config/profiles.ini.php`
+
+Enabling the multiauth driver
+-----------------------------
+
+In the application configuration, you may have :
+
+```ini
+[coordplugin_auth]
+driver=multiauth
+```
+
+It activate the driver of multiauth for jAuth.
+
+Into `auth.coord.ini.php`
 ------------------------------
 
-You must modify the configuration file `auth.coord.ini.php`.
- 
-First, set `driver=multiauth`.
-
-Then you should add a section `multiauth`:
+In the configuration file `auth.coord.ini.php`, you should have a section `multiauth`
+with parameters for jAuth and authdb_admin.
 
 ```ini
 [multiauth]
@@ -48,20 +65,12 @@ dao = "jauthdb~jelixuser"
 ; profile to use for jDb 
 profile = "jauth"
 
-; list of authentication providers
-providers[]=ldap:multiauth_ldap
-providers[]=dbdao:centraldb
-providers[]=dbaccounts
-
 ; name of the form for the jauthdb_admin module
 form = "jauthdb_admin~jelixuser"
 
 ; path of the directory where to store files uploaded by the form (jauthdb_admin module)
 ; should be related to the var directory of the application
 uploadsDirectory= ""
-
-; if set to on, when a user login successfully, an account will be created automatically
-automaticAccountCreation = on
 
 ; required. Internal use for jAuth. Don't touch it.
 compatiblewithdb = on
@@ -70,10 +79,32 @@ compatiblewithdb = on
 ; users table.
 ; @deprecated
 password_crypt_function = sha1
+```
+
+
+Into the application configuration (`mainconfig.ini.php` or `localconfig.ini.php`)
+----------------------------------------------------------------------------------
+
+You should have this kind of parameters :
+
+```ini
+[multiauth]
+; list of authentication providers
+providers[]=ldap:multiauth_ldap
+providers[]=dbdao:centraldb
+providers[]=dbaccounts
+
+; if set to on, when a user login successfully, an account will be created automatically
+automaticAccountCreation = on
 
 ```
 
-The list of providers is the list of plugin that will be used, one after an
+This section can contain any parameters of the `multiauth` section from `auth.coord.ini.php`,
+to redefine them without modifying `auth.coord.ini.php`. You can put this section into `localconfig.ini.php`
+to redefine parameters either from `auth.coord.ini.php`, or `mainconfig.ini.php`.
+
+
+The list of providers `providers` is the list of plugin that will be used, one after an
 other, to try to authenticate the user by his login/password.
 
 Three providers are provided with the module:
@@ -98,20 +129,6 @@ ldapprofile = "multiauthldap"
 For `dbaccounts`, no configuration section indicated, as it is not configurable.
 
 
-using the `localconfig.ini.php`
--------------------------------
-
-You may want to change some values of the configuration from `auth.coord.ini.php`,
-in a specific instance of your application. The multiauth plugin is able to
-load its configuration from the `localconfig.ini.php` in addition from,
-`auth.coord.ini.php`, so you don't have to modify `auth.coord.ini.php`.
-
-In your `localconfig.ini.php`, create a section `multiauth`. It can contains
-all parameters that you can set into the `multiauth` of `auth.coord.ini.php`.
-The parameters from `localconfig.ini.php` overwrites parameters from `auth.coord.ini.php`.
-
-Same behavior for provider configuration section. 
-
 Configuring ldap provider
 -------------------------
 
@@ -131,6 +148,8 @@ The `dbdao` plugin needs a simple configuration section containing a `dao` and
 a `profile` parameter, needed to access to the table containing login/password.
 Warning: it must not be the same dao/profile used by the multiauth plugin !
 Else you could have some security issue.
+
+With the example above having `providers[]=dbdao:centraldb`, you should set a section `centraldb`:
 
 ```ini
 [centraldb]
@@ -161,3 +180,5 @@ ldapprofile = "ldapserver1"
 ldapprofile = "ldapserver2"
 ```
 
+Note: if you are using the ldapadmin module to have an interface to configure the ldap connection,
+ldapadmin only support one ldap configuration. It will configure only the first one. 

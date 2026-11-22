@@ -1,16 +1,17 @@
 <?php
 /**
  * @author      Laurent Jouanneau
- * @copyright   2020 Laurent Jouanneau
+ * @copyright   2020-2026 Laurent Jouanneau
  * @license  http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public Licence, see LICENCE file
  */
+
+use Jelix\IniFile\IniModifier;
+use Jelix\IniFile\IniReader;
 use \Jelix\Installer\Module\API\ConfigurationHelpers;
 use Jelix\Routing\UrlMapping\EntryPointUrlModifier;
 
 class multiauthModuleConfigurator extends \Jelix\Installer\Module\Configurator
 {
-
-
 
     public function getDefaultParameters()
     {
@@ -43,11 +44,23 @@ class multiauthModuleConfigurator extends \Jelix\Installer\Module\Configurator
                 true
             );
         }
-
-        $helpers->getConfigIni()->setValue('driver', 'multiauth', 'coordplugin_auth');
+        $appConfigIni = $helpers->getConfigIni();
+        if (!$this->parameters['manualconfig'] && !$appConfigIni->isSection('multiauth')) {
+            $appSConfigIni = $helpers->getSingleConfigIni();
+            $appSConfigIni->import(new IniModifier(__DIR__.'/appconfig.ini.php'));
+            $appSConfigIni->save();
+        }
 
         foreach($this->getParameter('eps') as $epId) {
             $this->configureEntryPoint($epId, $helpers);
+        }
+
+        if (!$this->parameters['manualconfig']) {
+            $pIni = $helpers->getProfilesIni();
+            if (!$pIni->isSection('ldap:multiauthldap')) {
+                $pIni->import(new IniReader(__DIR__.'/ldapprofile.ini.php'));
+                $pIni->save();
+            }
         }
     }
 
@@ -77,7 +90,6 @@ class multiauthModuleConfigurator extends \Jelix\Installer\Module\Configurator
                     'profile' => 'jauth',
                     'form' => 'jauthdb_admin~jelixuser',
                     'providers' => array('dbaccounts'),
-                    'automaticAccountCreation' => true,
                     'compatiblewithdb' => true,
                     'password_crypt_function' => 'sha1',
                 ), 'multiauth');

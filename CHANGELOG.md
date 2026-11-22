@@ -14,8 +14,6 @@ It has been rewritten, is more secured and brings some new features:
 
 - possibility to use a client TLS certificate. Warning: it can be used only on a PHP server serving
   a single application, since the certificate is persistent in a process (this is a limitation of the openldap library)
-- possibility to enable the change of the password
-
 
 **Removed configuration parameters for ldap**
 
@@ -34,9 +32,16 @@ It has been rewritten, is more secured and brings some new features:
 - `featureChangePassword` to enable/disable the possibility for the user to change his password
 - `passwordLdapHashAlgo`: the hash algorithm to use to send the new password to Ldap.
 
-How to migrate:
+**Other changes**
 
-The configuration is automatically migrated. However, if the authentication does
+- New object ProvidersConfigurations, ProviderConfiguration and LdapProviderConfig: it allows a module to retrieve and 
+  save easily a provider configuration, like the module ldapadmin to manage the ldap configuration.
+- A provider can now be disabled, with a configuration parameter `enabled=false` in its configuration
+- From now, configuration of providers is now set on main configuration instead of into auth.coord.ini.php (old configuration is still supported). 
+
+**How to migrate:**
+
+The configuration of ldap is automatically migrated. However, if the authentication does
 not work, check if `searchUserBaseDN` and `bindAttribute` are set correctly.
 
 

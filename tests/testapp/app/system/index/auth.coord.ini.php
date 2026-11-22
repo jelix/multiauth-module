@@ -135,20 +135,12 @@ dao="jauthdb~jelixuser"
 ; profile to use for jDb
 profile=jauth
 
-; list of authentication providers
-providers[]="ldap:multiauth_ldap"
-providers[]=dbaccounts
-
 ; name of the form for the jauthdb_admin module
 form="jauthdb_admin~jelixuser"
 
 ; path of the directory where to store files uploaded by the form (jauthdb_admin module)
 ; should be related to the var directory of the application
 uploadsDirectory=
-
-
-; when a user login successfully, an account will be created automatically
-automaticAccountCreation=on
 
 compatiblewithdb=on
 
@@ -157,57 +149,6 @@ compatiblewithdb=on
 ; users table.
 ; @deprecated
 password_crypt_function=sha1
-
-
-
-;------- parameters for the multiauth ldap plugin
-
-[multiauth_ldap]
-; profile to use for ldap
-ldapprofile=multiauthldap
-
-; all of this following parameters should be set into the profiles.ini.php file.
-; Here is their default values.
-
-; base dn to search users. Used to search a user using the filter from searchUserFilter
-; example for Active Directory: "ou=ADAM users,o=Microsoft,c=US", or "OU=Town,DC=my-town,DC=com"
-searchUserBaseDN="ou=people,dc=tests,dc=jelix"
-
-; filter to get user information, with the given login name
-; example for Active Directory: "(sAMAccountName=%%LOGIN%%)"
-searchUserFilter[]="(&(objectClass=inetOrgPerson)(uid=%%LOGIN%%))"
-searchUserFilter[]="(&(objectClass=simpleSecurityObject)(cn=%%LOGIN%%))"
-
-
-; attributes to retrieve for a user
-; for dao mapping: "ldap attribute:dao attribute"
-; ex: "uid:login,givenName:firstname,mail:email" : uid goes into the login property,
-; ldap attribute givenName goes to the property firstname etc..
-; example for Active Directory: "cn,distinguishedName,name"
-; or "sAMAccountName:login,givenName:firstname,sn:lastname,mail:email,distinguishedName,name,dn"
-searchAttributes="uid:login,mail:email"
-
-; search ldap filter to retrieve groups of a user.
-; The user will be assign to jAcl2 groups having the same name of ldap groups.
-; Leave empty if you don't want this synchronisation between jAcl2 groups and
-; ldap groups.
-; !!! IMPORTANT !!! : if searchGroupFilter is not empty,
-; the plugin will remove the user from all existing jelix groups
-; and only keep the relation between the user and the group retrieved from LDAP
-;searchGroupFilter="(&(objectClass=posixGroup)(cn=XYZ*)(memberUid=%%LOGIN%%))"
-searchGroupFilter="(&(objectClass=groupOfNames)(cn=*)(member=%%USERDN%%))"
-
-; if set to on, users are set in default groups during groups synchronization
-; default is on.
-searchGroupKeepUserInDefaultGroups=on
-
-; the property in the ldap entry corresponding to a group, that indicate the
-; the group name
-searchGroupProperty=cn
-
-; base dn to search groups. Used to search a group using the filter from searchGroupFilter
-searchGroupBaseDN="ou=groups,dc=tests,dc=jelix"
-
 
 
 

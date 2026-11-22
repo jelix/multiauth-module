@@ -11,19 +11,19 @@ First you should setup the module into the authentication system, by modifying
 the `auth.coord.ini.php` file.
 
 If you have installed multiauth into [Lizmap Web Client](https://www.lizmap.com/),
-you don't have to create or modify any `auth.coord.ini.php` file. The multiauth
-module is pre-configured, with an ldap profile named `lizmapldap`, you have to fill 
+you don't have to create or modify any `auth.coord.ini.php` file or the application configuration file. 
+The multiauth module is pre-configured, with an ldap profile named `lizmapldap`. You have to fill it 
 with correct values for the connection. Go the next section. 
 
-In other applications, you should create a section into `auth.coord.ini.php`. Its name should
+In other applications, you should create a section into your application configuration. Its name should
 be set into the `providers` parameter of multiauth.
 
 In this section, only one parameter is needed: `ldapprofile`. It
 indicates the name of the profile to access the ldap.
 
-Here is an example into `auth.coord.ini.php`:
+Here is an example into `mainconfig.ini.php` or `localconfig.ini.php`:
 
-```
+```ini
 [multiauth]
 providers[]=ldap:multiauth_ldap
 
@@ -55,8 +55,9 @@ adminUserDn="cn=admin,ou=admins,dc=acme"
 adminPassword="Sup3rP4ssw0rd"
 searchUserBaseDN="dc=XY,dc=fr"
 searchUserFilter="(&(objectClass=posixAccount)(uid=%%LOGIN%%))"
-bindUserDN="uid=%?%,ou=users,dc=XY,dc=fr"
 searchAttributes="uid:login,givenName:firstname,sn:lastname,mail:email"
+
+featureGroupLoad=off
 searchGroupFilter="(&(objectClass=posixGroup)(cn=XYZ*)(memberUid=%%LOGIN%%))"
 searchGroupProperty="cn"
 searchGroupBaseDN=""
@@ -96,12 +97,12 @@ Other connection parameters:
 Using client certificates and custom CA certificates
 ----------------------------------------------------
 
-If the server is using a custom or self-signed CA certificate, indicate the path to this certificate
-into the configuration parameter `clientTLSCACertificateFile`.
+If the server is using a custom or self-signed CA certificate, indicate the path to this
+certificate into the configuration parameter `clientTLSCACertificateFile`.
 
 If the server requires a client certificate, indicate the path to the client certificate
 into the configuration parameter `clientTLSCertificateFile` and the path to the client key
-into the configuration parameter `clientTLSKeyFile`.
+into the configuration parameter `clientTLSKeyFile`. Finally set `featureClientTLSCertificate` to `on`.
 
 **Warning**: don't use these parameters on a PHP server which serves different PHP applications, because these
 openldap settings are global to the PHP process and can affect other PHP applications running on the same server. For the same reason, you cannot use several instances of the Ldap class with different client certificates, during the same http request. All connections will use the same client certificate. This is not a limitation of our Ldap library, but of PHP and OpenLdap.
@@ -216,10 +217,10 @@ If you have configured groups rights into your application, and if these
 groups match your ldap groups, you can indicate to the plugin to automatically
 put the user into the application groups, according to the user ldap groups.
 
-This feature is disabled by default. To enable it, set `featureGroupLoad` to `true`,
+This feature is disabled by default. To enable it, set `featureGroupLoad` to `on`,
 and fill the `searchGroupFilter`, `searchGroupProperty` and `searchGroupBaseDN`
-parameters. These three parameters are required when `featureGroupLoad` is `true`:
-an exception is thrown if one of them is empty. So set `featureGroupLoad` to `true`.
+parameters. These three parameters are required when `featureGroupLoad` is `on`:
+an exception is thrown if one of them is empty. So set `featureGroupLoad` to `on`.
 
 You should then indicate into `searchGroupFilter` the ldap query that will
 retrieve the groups of the user.
@@ -240,26 +241,6 @@ contains the group name. Ex: `searchGroupProperty="cn"`.
 
 You may also indicate the base DN for the search, into `searchGroupBaseDN`. Example:
 `searchGroupBaseDN="ou=Groups,dc=Acme,dc=pt"`.
-
-Passwords
----------
-
-With `passwordLdapHashAlgo`, you indicate how passwords are stored when you authorize the
-application to change the password. Set `featureChangePassword`
-
-- `EXOP`: the password is sent to the server with the "Password Modify Extended Operation"
-  (RFC 3062). The server hashes the password with its own configuration and applies its
-  password policy. It is the recommended value if your server supports it (OpenLdap does,
-  Active Directory doesn't).
-- `AD`: for Microsoft Active Directory. The password is stored into the `unicodePwd`
-  attribute, encoded as expected by Active Directory, and the server applies its password
-  policy. An encrypted connection is required (`tlsMode` should be `starttls` or `ldaps`).
-  See the Active Directory example below.
-- `CRYPT`: the password is hashed with SHA-512 crypt (`{CRYPT}$6$...`).
-- `SSHA`: salted SHA-1. The salt length is given by `passwordLdapSaltLength` (8 bytes minimum).
-- `SHA`, `MD5`, `SMD5`: weak algorithms, kept for compatibility. A warning is logged when they are used.
-- empty value (default): the password is not hashed by the library. Use it only if the
-  server hashes passwords itself (with the `ppolicy_hash_cleartext` option of OpenLdap for example).
 
 
 Example of configuration for an OpenLdap server
@@ -291,16 +272,6 @@ featureGroupLoad=on
 searchGroupBaseDN="ou=groups,dc=example,dc=com"
 searchGroupFilter="(&(objectClass=groupOfNames)(member=%%USERDN%%))"
 searchGroupProperty=cn
-
-; management of user accounts
-featureChangePassword=on
-featureCreateUser=on
-featureUpdateUser=on
-featureDeleteUser=on
-newUserDN="uid=%%LOGIN%%,ou=people,dc=example,dc=com"
-newUserLdapAttributes="objectClass:inetOrgPerson,uid:%%LOGIN%%,userPassword:%%PASSWORD%%,cn:%%REALNAME%%,sn:%%REALNAME%%"
-passwordLdapHashAlgo=EXOP
-
 ```
 
 If your groups are `posixGroup` entries, they list logins instead of DNs into
@@ -361,16 +332,3 @@ Notes:
   to other partitions of the directory. If you have performance issues, set a more
   specific `searchUserBaseDN`, or use the Global Catalog (port 3268, or 3269 with ldaps).
 
-Active Directory does not support the "Password Modify Extended Operation", and stores
-passwords into the `unicodePwd` attribute. To change passwords
-set `passwordLdapHashAlgo` to `AD`, and enable features you need:
-
-```
-; ... same parameters as above
-passwordLdapHashAlgo=AD',
-featureChangePassword=on
-```
-
-- The service account must have the "Reset Password" right.
-- the password change with the service account: the password history
-  of the domain is not checked by Active Directory.
