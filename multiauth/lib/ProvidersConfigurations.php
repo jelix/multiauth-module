@@ -65,8 +65,6 @@ class ProvidersConfigurations
         return new self($configMultiauth);
     }
 
-    protected $authConfig = array();
-
     protected $multiauthConfig = array();
 
     /**
@@ -105,15 +103,15 @@ class ProvidersConfigurations
             $this->providersConfig[] = new ProviderConfiguration('dbaccounts', 'dbaccounts', array());
         }
         else {
-            $config = jAuth::loadConfig();
+            $authConfig = jAuth::loadConfig();
             foreach ($multiauthConfig['providers'] as $providerKey) {
                 $providerConfig = $this->getDefaultProviderConfig();
                 if (strpos($providerKey, ':') !== false) {
                     list($provider, $providerSection) = explode(':', $providerKey);
 
                     $providerSectionExists = false;
-                    if (isset($config[$providerSection]) && is_array($config[$providerSection])) {
-                        $providerConfig = array_merge($providerConfig, $config[$providerSection]);
+                    if (isset($authConfig[$providerSection]) && is_array($authConfig[$providerSection])) {
+                        $providerConfig = array_merge($providerConfig, $authConfig[$providerSection]);
                         $providerSectionExists = true;
                     }
 
@@ -205,9 +203,6 @@ class ProvidersConfigurations
                     throw new ProviderConfigurationException("Multiauth plugin does not accept multiple providers based on the account table", 7);
                 }
                 $dbAccountProvider = $plugin;
-            }
-            else {
-                \jLog::log($providerConf->providerKey. ' not db account provider', 'warning');
             }
         }
         return $providers;

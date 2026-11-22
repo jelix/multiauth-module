@@ -5,5 +5,10 @@
         "php": ">=8.2",
         "phpunit/phpunit": "^8.5.27"
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "autoload": {
+      "psr-4": {
+        "Jelix\\MultiAuth\\": "../../multiauth/lib/"
+      }
+    }
 }
