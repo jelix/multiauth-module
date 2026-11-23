@@ -110,6 +110,8 @@ openldap settings are global to the PHP process and can affect other PHP applica
 If you are using PHP-FPM, you can configure a pool dedicated to your application, so processes are not shared
 with other applications.
 
+Path can be absolute path, or relative to the `var/config/` directory of the application.
+
 
 Configuration properties for the admin
 --------------------------------------

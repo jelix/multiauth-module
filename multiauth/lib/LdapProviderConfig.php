@@ -6,7 +6,7 @@
  */
 namespace Jelix\MultiAuth;
 
-use jException;
+use Jelix\FileUtilities\Path;
 use jProfiles;
 
 class LdapProviderConfig
@@ -51,6 +51,33 @@ class LdapProviderConfig
             }
         }
 
+        return $providerConfig;
+    }
+
+    /**
+     * Prepare the ldap configuration so it is ready to give it to LdapClient
+     *
+     * It resolves file paths of some parameters.
+     *
+     * @param array $providerConfig
+     * @return array the updated configuration, ready to be given to LdapClient;
+     */
+    public static function prepareConfigurationForClient(array $providerConfig) : array
+    {
+        if ($providerConfig['clientTLSCACertificateFile']) {
+            if (!Path::isAbsolute($providerConfig['clientTLSCACertificateFile'])) {
+                $providerConfig['clientTLSCACertificateFile'] = \jApp::varConfigPath($providerConfig['clientTLSCACertificateFile']);
+            }
+        }
+
+        if ($providerConfig['featureClientTLSCertificate']) {
+            if ($providerConfig['clientTLSCertificateFile'] && !Path::isAbsolute($providerConfig['clientTLSCertificateFile'])) {
+                $providerConfig['clientTLSCertificateFile'] = \jApp::varConfigPath($providerConfig['clientTLSCertificateFile']);
+            }
+            if ($providerConfig['clientTLSKeyFile'] && !Path::isAbsolute($providerConfig['clientTLSKeyFile'])) {
+                $providerConfig['clientTLSKeyFile'] = \jApp::varConfigPath($providerConfig['clientTLSKeyFile']);
+            }
+        }
         return $providerConfig;
     }
 }

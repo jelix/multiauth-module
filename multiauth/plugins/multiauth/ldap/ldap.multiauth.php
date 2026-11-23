@@ -36,6 +36,7 @@ class ldapProvider extends ProviderAbstract
         parent::__construct($params);
 
         $this->_params = LdapProviderConfig::loadFullConfiguration($this->_params);
+        $this->_params = LdapProviderConfig::prepareConfigurationForClient($this->_params);
 
         $logger = new LdapLogger();
 
