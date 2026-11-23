@@ -249,7 +249,7 @@ class ProvidersConfigurations
             $providerConfig['enabled'] = false;
             $providerConfig['ldapprofile'] = 'multiauthldap';
             $providerConfig = array_merge(LdapClient::defaultParameters, $providerConfig);
-            return new ProviderConfiguration('ldap:multiauth_ldap', 'ldap', 'multiauth_ldap', $providerConfig, false);
+            return new ProviderConfiguration('ldap:multiauth_ldap', 'ldap', $providerConfig, 'multiauth_ldap', false);
         }
         return null;
     }
