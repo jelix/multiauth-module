@@ -339,7 +339,7 @@ class ProvidersConfigurations
 
         // update the configuration of the provider
         $ini->setValue('ldapprofile', $ldapProfile, $ldapProviderConfig->providerConfigName);
-        $ini->setValue('enabled', $ldapConfig['enabled'] ?: false, $ldapProviderConfig->providerConfigName);
+        $ini->setValue('enabled', $ldapConfig['enabled'] ?? false, $ldapProviderConfig->providerConfigName);
         $ini->save();
 
         return $ldapProviderConfig;
