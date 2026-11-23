@@ -64,17 +64,18 @@ class LdapProviderConfig
      */
     public static function prepareConfigurationForClient(array $providerConfig) : array
     {
-        if ($providerConfig['clientTLSCACertificateFile']) {
+
+        if (isset($providerConfig['clientTLSCACertificateFile']) && $providerConfig['clientTLSCACertificateFile']) {
             if (!Path::isAbsolute($providerConfig['clientTLSCACertificateFile'])) {
                 $providerConfig['clientTLSCACertificateFile'] = \jApp::varConfigPath($providerConfig['clientTLSCACertificateFile']);
             }
         }
 
-        if ($providerConfig['featureClientTLSCertificate']) {
-            if ($providerConfig['clientTLSCertificateFile'] && !Path::isAbsolute($providerConfig['clientTLSCertificateFile'])) {
+        if (isset($providerConfig['featureClientTLSCertificate']) && $providerConfig['featureClientTLSCertificate']) {
+            if (isset($providerConfig['clientTLSCertificateFile']) && $providerConfig['clientTLSCertificateFile'] && !Path::isAbsolute($providerConfig['clientTLSCertificateFile'])) {
                 $providerConfig['clientTLSCertificateFile'] = \jApp::varConfigPath($providerConfig['clientTLSCertificateFile']);
             }
-            if ($providerConfig['clientTLSKeyFile'] && !Path::isAbsolute($providerConfig['clientTLSKeyFile'])) {
+            if (isset($providerConfig['clientTLSKeyFile']) && $providerConfig['clientTLSKeyFile'] && !Path::isAbsolute($providerConfig['clientTLSKeyFile'])) {
                 $providerConfig['clientTLSKeyFile'] = \jApp::varConfigPath($providerConfig['clientTLSKeyFile']);
             }
         }
