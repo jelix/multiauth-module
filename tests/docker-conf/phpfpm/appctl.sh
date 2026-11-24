@@ -175,7 +175,7 @@ case $COMMAND in
         composerInstall;;
     composer_update)
         composerUpdate;;
-    unittests)
+    unit-tests)
         UTCMD="cd $UNITTESTS_DIR/ && ./vendor/bin/phpunit  $@"
         su $APP_USER -c "$UTCMD"
         ;;
