@@ -1,12 +1,12 @@
 Changes
 =======
 
-next
------
+v2.0.0
+------
 
 Compatibility PHP 8.2 minimum.
 
-Drop support of Jelix 1.7 and Lizmap 3.5 or lower.
+Drop support of Jelix 1.7 and lower, and drop support of Lizmap 3.5 or lower.
 
 **Improve the ldap connector**
 
@@ -36,8 +36,8 @@ It has been rewritten, is more secured and brings some new features:
 
 - New object ProvidersConfigurations, ProviderConfiguration and LdapProviderConfig: it allows a module to retrieve and 
   save easily a provider configuration, like the module ldapadmin to manage the ldap configuration.
-- A provider can now be disabled, with a configuration parameter `enabled=false` in its configuration
-- From now, configuration of providers is now set on main configuration instead of into auth.coord.ini.php (old configuration is still supported). 
+- A provider can now be disabled, with a configuration parameter `enabled=off` in its configuration
+- From now, configuration of providers is now set on main configuration instead of into` auth.coord.ini.php` (old configuration is still supported). 
 
 **How to migrate:**
 

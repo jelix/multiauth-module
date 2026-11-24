@@ -10,22 +10,27 @@ and it is compatible with jauth, jauthdb, jauthdb_admin and jcommunity modules.
 Install files with Jelix 1.8+
 -----------------------------
 
-You should use Composer to install the module. Run this commands in a shell:
+You should use Composer to install the module. Run this commands in a shell, in the directory of your application
+where there is a composer.json file:
 
 ```
 composer require "jelix/multiauth-module"
 ```
 
-Launch the configurator for your application to enable the module
+You have then to launch the configurator for your application to enable the module.
+
+If you are a developper and want to bundle multiauth with your application you develop:
 
 ```bash
-# for developers of the application
 php yourapp/dev.php module:configure multiauth
-# or for users adding multiauth on a application they just installed:
-php yourapp/configure.php multiauth
-
 php yourapp/install/installer.php
+```
 
+If you are an administrator and want to use multiauth into the application you installed:
+
+```bash
+php yourapp/configure.php multiauth
+php yourapp/install/installer.php
 ```
 
 Configuration

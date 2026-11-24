@@ -14,9 +14,8 @@ use Jelix\MultiAuth\ProvidersConfigurations;
 
 class multiauthModuleUpgrader_newldaplib extends \Jelix\Installer\Module\Installer
 {
-    protected $targetVersions = array('1.3.0-beta.1');
-    protected $date = '2026-11-11';
-
+    protected $targetVersions = array('2.0.0-rc.1');
+    protected $date = '2026-11-24';
 
     public function install(InstallHelpers $helpers)
     {
