@@ -5,7 +5,8 @@
     "require": {
       "php": ">=8.2",
       "jelix/jelix": "dev-jelix-1.8.x",
-      "jelix/ldap-client": "^1.0.0"
+      "jelix/ldap-client": "^1.0.0",
+      "psr/log": "^3.0.2"
     },
     "minimum-stability": "stable",
     "config": {

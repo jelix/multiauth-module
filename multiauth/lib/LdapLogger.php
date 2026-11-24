@@ -15,52 +15,52 @@ use Psr\Log\LoggerInterface;
 class LdapLogger implements LoggerInterface
 {
 
-    public function emergency($message, array $context = array())
+    public function emergency(string|\Stringable $message, array $context = array()): void
     {
         jLog::log($message, 'auth');
         jLog::log($message, 'error');
 
     }
 
-    public function alert($message, array $context = array())
+    public function alert(string|\Stringable $message, array $context = array()): void
     {
         jLog::log($message, 'auth');
         jLog::log($message, 'error');
     }
 
-    public function critical($message, array $context = array())
+    public function critical(string|\Stringable $message, array $context = array()): void
     {
         jLog::log($message, 'auth');
         jLog::log($message, 'error');
     }
 
-    public function error($message, array $context = array())
+    public function error(string|\Stringable $message, array $context = array()): void
     {
         jLog::log($message, 'auth');
         jLog::log($message, 'error');
     }
 
-    public function warning($message, array $context = array())
+    public function warning(string|\Stringable $message, array $context = array()): void
     {
         jLog::log($message, 'auth');
     }
 
-    public function notice($message, array $context = array())
+    public function notice(string|\Stringable $message, array $context = array()): void
     {
         jLog::log($message, 'auth');
     }
 
-    public function info($message, array $context = array())
+    public function info(string|\Stringable $message, array $context = array()): void
     {
         jLog::log($message, 'auth');
     }
 
-    public function debug($message, array $context = array())
+    public function debug(string|\Stringable $message, array $context = array()): void
     {
         jLog::log($message, 'auth');
     }
 
-    public function log($level, $message, array $context = array())
+    public function log($level, string|\Stringable $message, array $context = array()): void
     {
         jLog::log($message, 'auth');
     }
