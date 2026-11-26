@@ -50,6 +50,9 @@ class multiauthModuleConfigurator extends \Jelix\Installer\Module\Configurator
             $appSConfigIni->import(new IniModifier(__DIR__.'/appconfig.ini.php'));
             $appSConfigIni->save();
         }
+        else {
+            $appConfigIni->setValue('driver', 'multiauth', 'coordplugin_auth');
+        }
 
         foreach($this->getParameter('eps') as $epId) {
             $this->configureEntryPoint($epId, $helpers);
