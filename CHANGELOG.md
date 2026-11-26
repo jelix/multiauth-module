@@ -1,6 +1,13 @@
 Changes
 =======
 
+v2.0.1
+------
+
+- fix(installer) script to uninstall properly the module
+- fix(installer) auth driver was not set in some case
+- refact(ProvidersConfiguration) refactor duplicated code
+
 v2.0.0
 ------
 
