@@ -28,15 +28,8 @@ class ProvidersConfigurations
         }
 
         $confIni = parse_ini_file($authConfigFilePath, true);
-        $authConfig = jAuth::loadConfig($confIni);
-        if (isset($authConfig['multiauth'])) {
-            $configMultiauth = $authConfig['multiauth'];
-            if (property_exists(jApp::config(), 'multiauth') && is_array(jApp::config()->multiauth)) {
-                $configMultiauth = array_merge($configMultiauth, jApp::config()->multiauth);
-            }
-            return new self($configMultiauth);
-        }
-        throw new ProviderConfigurationException('multiauth configuration not found', 3);
+        $configMultiauth = self::loadMultiAuthConfig($confIni);
+        return new self($configMultiauth);
     }
 
     /**
@@ -46,9 +39,9 @@ class ProvidersConfigurations
      * @throws ProviderConfigurationException  if configuration is not found.
      * @throws \jException
      */
-    public static function loadMultiAuthConfig() : array
+    public static function loadMultiAuthConfig($authCoordPluginConf = null) : array
     {
-        $authConfig = jAuth::loadConfig();
+        $authConfig = jAuth::loadConfig($authCoordPluginConf);
         if (isset($authConfig['multiauth'])) {
             $configMultiauth = $authConfig['multiauth'];
             if (property_exists(jApp::config(), 'multiauth') && is_array(jApp::config()->multiauth)) {
